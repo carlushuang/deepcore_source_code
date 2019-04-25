@@ -1,4 +1,4 @@
-﻿#ifndef __cgemm_h__
+#ifndef __cgemm_h__
 #define __cgemm_h__
 
 #include"../../include/cuda/cuda_context.h"

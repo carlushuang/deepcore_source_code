@@ -1,4 +1,4 @@
-﻿#pragma warning(disable:4101)
+#pragma warning(disable:4101)
 #include"../include/deepcore.h"
 #include"../include/idc_tensor_shape.h"
 #include"../include/cuda/cuda_platform.h"

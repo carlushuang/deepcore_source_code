@@ -1,4 +1,4 @@
-﻿#pragma warning( disable:4996 )
+#pragma warning( disable:4996 )
 #include"../../include/cuda/cuda_context.h"
 
 static const unsigned int long long kbin_fftconv_sm50[]=

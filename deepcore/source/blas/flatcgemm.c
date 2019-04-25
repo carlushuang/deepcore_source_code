@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/cgemm.h"
+#include"../../include/blas/cgemm.h"
 
 static void sflatcgemm_bk_b01( cuda_kernel_t* p_kernel, CUmodule module, int m, int bat, int onc )
 {

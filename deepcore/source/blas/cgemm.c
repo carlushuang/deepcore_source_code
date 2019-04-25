@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/cgemm.h"
+#include"../../include/blas/cgemm.h"
 #include"../../include/blas/blasEx.h"
 
 static void scgemm_create_kernel( cuda_kernel_t* p_kernel, const cuda_context_t* p_ctx, int bat, int anr, int bnr, int cnc, int lda, int ldb )

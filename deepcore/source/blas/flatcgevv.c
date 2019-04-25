@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/cgemm.h"
+#include"../../include/blas/cgemm.h"
 
 static void sflatcgevv_create_kernel( cuda_kernel_t* p_kernel, const cuda_context_t* p_ctx, int slice_size, int bat, int pnc, int qnc )
 {

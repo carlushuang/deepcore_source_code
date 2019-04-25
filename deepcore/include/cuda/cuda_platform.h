@@ -1,4 +1,4 @@
-﻿#ifndef __platform_h__
+#ifndef __platform_h__
 #define __platform_h__
 
 #include<cuda.h>

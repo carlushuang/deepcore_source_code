@@ -1,4 +1,4 @@
-﻿__global__ void __launch_bounds__(256,2) dk_sfft32x32_r2c( float2* d_c, 
+__global__ void __launch_bounds__(256,2) dk_sfft32x32_r2c( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, int n, int n_cells )
 {

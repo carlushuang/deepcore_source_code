@@ -1,4 +1,4 @@
-﻿#include"../../include/conv/fftconv.h"
+#include"../../include/conv/fftconv.h"
 
 __local_func int idc_cellconv_choose_optimal_size( int nx, int ny, int fx, int fy )
 {

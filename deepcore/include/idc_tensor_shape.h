@@ -1,4 +1,4 @@
-﻿#ifndef __idc_tensor_shape_h__
+#ifndef __idc_tensor_shape_h__
 #define __idc_tensor_shape_h__
 
 #include"idc_bop.h"

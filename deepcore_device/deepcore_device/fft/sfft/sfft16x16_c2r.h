@@ -1,4 +1,4 @@
-﻿#define sfft16x16_c2r(dir,suffix)        \
+#define sfft16x16_c2r(dir,suffix)        \
 __global__ void dk_sfft16x16_c2r##suffix(\
           float *              d_r  ,    \
     const float2* __restrict__ d_c  ,    \

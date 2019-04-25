@@ -1,4 +1,4 @@
-﻿#ifndef __fftconv_h__
+#ifndef __fftconv_h__
 #define __fftconv_h__
 
 #include"../../include/fft/fft.h"

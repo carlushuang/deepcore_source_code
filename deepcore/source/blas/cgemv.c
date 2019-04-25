@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/cgemm.h"
+#include"../../include/blas/cgemm.h"
 
 __local_func void idc_cgemv_create_kernel( cuda_kernel_t* p_kernel, const cuda_context_t* p_ctx, int bat, int nr, int nc, int lda, int ldb, int ldc )
 {

@@ -1,4 +1,4 @@
-﻿#ifndef __idc_fft_calcRF_h__
+#ifndef __idc_fft_calcRF_h__
 #define __idc_fft_calcRF_h__
 
 #include<math.h>

@@ -1,4 +1,4 @@
-﻿#ifndef __idc_macro_h__
+#ifndef __idc_macro_h__
 #define __idc_macro_h__
 
 #define IDC_MAX_DEVICES_PER_NODE  32

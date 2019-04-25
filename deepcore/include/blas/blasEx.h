@@ -1,4 +1,4 @@
-﻿#ifndef __blasEx_h__
+#ifndef __blasEx_h__
 #define __blasEx_h__
 
 #include"../idc_macro.h"

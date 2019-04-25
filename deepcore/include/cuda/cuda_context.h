@@ -1,4 +1,4 @@
-﻿#ifndef __cuda_ctx_h__
+#ifndef __cuda_ctx_h__
 #define __cuda_ctx_h__
 
 #include"../idc_status.h"

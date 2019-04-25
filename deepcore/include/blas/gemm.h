@@ -1,4 +1,4 @@
-﻿#ifndef __gemm_h__
+#ifndef __gemm_h__
 #define __gemm_h__
 
 #include"../idc_string.h"

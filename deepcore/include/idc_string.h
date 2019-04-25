@@ -1,4 +1,4 @@
-﻿#ifndef __idc_string_h__
+#ifndef __idc_string_h__
 #define __idc_string_h__
 
 #include"idc_macro.h"

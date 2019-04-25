@@ -1,4 +1,4 @@
-﻿#include"../../include/cuda/cuda_platform.h"
+#include"../../include/cuda/cuda_platform.h"
 #include"../../include/idc_status.h"
 
 static int __get_devices( CUdevice* const p_device, int* const p_arch )

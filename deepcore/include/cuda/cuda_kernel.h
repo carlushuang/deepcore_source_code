@@ -1,4 +1,4 @@
-﻿#ifndef __cuda_kernel_h__
+#ifndef __cuda_kernel_h__
 #define __cuda_kernel_h__
 
 #include<stdint.h>

@@ -1,4 +1,4 @@
-﻿#ifndef __fft_h__
+#ifndef __fft_h__
 #define __fft_h__
 
 #include"../../include/cuda/cuda_context.h"

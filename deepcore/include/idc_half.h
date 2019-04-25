@@ -1,4 +1,4 @@
-﻿#ifndef __idc_half_h__
+#ifndef __idc_half_h__
 #define __idc_half_h__
 
 #include"idc_macro.h"

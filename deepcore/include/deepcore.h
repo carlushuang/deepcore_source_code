@@ -1,4 +1,4 @@
-﻿#ifndef __deepcore_h__
+#ifndef __deepcore_h__
 #define __deepcore_h__
 
 #if defined(_M_X64)||defined(_M_AMD64)||defined(__x86_64)||defined(_M_IA64)||defined(__LP64__)

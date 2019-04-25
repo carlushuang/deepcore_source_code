@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/gemm.h"
+#include"../../include/blas/gemm.h"
 #include"../../include/blas/blasEx.h"
 
 static void sgemm_create_kernel( idc_gemmOp_t* Op, const cuda_context_t* p_ctx, uint32_t mask, int ng, int anr, int bnr, int cnc, int lda, int ldb, int ldc )

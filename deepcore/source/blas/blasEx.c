@@ -1,4 +1,4 @@
-﻿#include"../../include/blas/blasEx.h"
+#include"../../include/blas/blasEx.h"
 
 __local_func unsigned int idc_get_optimal_sgemm_id( int nx, int ny, int n )
 {

@@ -1,4 +1,4 @@
-﻿#include"../../include/conv/fftconv.h"
+#include"../../include/conv/fftconv.h"
 
 __local_func size_t idc_cellconv_createOp( idc_fftconvOp_t* Op, const cuda_context_t* p_ctx, uint32_t mask, int ng, int pnx, int pny, int pnc, int ldp, int fnx, int fny, int qnx, int qny, int qnc, int ldq, int bat, int pad_x, int pad_y )
 {

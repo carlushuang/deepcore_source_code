@@ -1,4 +1,4 @@
-﻿#ifndef __idc_argmask_h__
+#ifndef __idc_argmask_h__
 #define __idc_argmask_h__
 
 #define PA       0x2

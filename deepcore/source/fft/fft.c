@@ -1,4 +1,4 @@
-﻿#pragma warning( disable:4996 )
+#pragma warning( disable:4996 )
 #include"../../include/fft/fft.h"
 #include"../../include/idc_string.h"
 
