@@ -3,7 +3,9 @@
 
 #include"idc_macro.h"
 #include<stdint.h>
+#ifdef _MSC_VER
 #include<intrin.h>
+#endif
 
 INLINE uint32_t idc_bhs( uint32_t n )
 {

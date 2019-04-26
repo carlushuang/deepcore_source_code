@@ -1,4 +1,7 @@
 #include"../../include/conv/fftconv.h"
+#ifdef __GNUC__
+#include <limits.h>
+#endif
 
 __local_func int idc_cellconv_choose_optimal_size( int nx, int ny, int fx, int fy )
 {
