@@ -5,6 +5,9 @@ static void sflatcgemm_bk_b01( cuda_kernel_t* p_kernel, CUmodule module, int m, 
     static const char* kname[]={"dk_sflatcgemm_1x32","dk_sflatcgemm_1x64","dk_sflatcgemm_1x128"};
     int i=(((onc>32)&(onc<=64))|((onc>128)&(onc<=192)))+((((onc>96)&(onc<=128))|(onc>192))<<1);
     int n=1<<(5+i);
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname[i]);
+#endif
     cuda_context_create_kernel( p_kernel, module, kname[i] );
     cuda_kernel_sgl( p_kernel, m*((onc+n-1)/n), 1, 1 );
     cuda_kernel_sbl( p_kernel, n, 1 );
@@ -15,12 +18,18 @@ static void sflatcgemm_bk_b02( cuda_kernel_t* p_kernel, CUmodule module, int m, 
     static const char* kname[]={"dk_sflatcgemm_2x32","dk_sflatcgemm_2x128","dk_sflatcgemm_2x256"};
     if(onc<=96){ i=0; } else{ i=2-(((i>96)&(i<=128))|((i>256)&(i<=384))); }
     n=i==0?32:(i==1?128:256);
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname[i]);
+#endif
     cuda_context_create_kernel( p_kernel, module, kname[i] );
     cuda_kernel_sgl( p_kernel, m*((onc+n-1)/n), 1, 1 );
     cuda_kernel_sbl( p_kernel, n, 1 );
 }
 static void sflatcgemm_bk_b04( cuda_kernel_t* p_kernel, CUmodule module, int m, int bat, int onc )
 {
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, "dk_sflatcgemm_4x32");
+#endif
     cuda_context_create_kernel( p_kernel, module, "dk_sflatcgemm_4x32" );
     cuda_kernel_sgl( p_kernel, m*((onc+31)>>5), 1, 1 );
     cuda_kernel_sbl( p_kernel, 64, 1 );
@@ -30,18 +39,27 @@ static void sflatcgemm_bk_b08( cuda_kernel_t* p_kernel, CUmodule module, int m, 
     static const char* kname[]={"dk_sflatcgemm_8x32","dk_sflatcgemm_8x64"};
     int i=((onc>32)&(onc<=64))|(onc>96);
     int n=1<<(5+i);
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname[i]);
+#endif
     cuda_context_create_kernel( p_kernel, module, kname[i] );
     cuda_kernel_sgl( p_kernel, ((bat+7)>>3)*((onc+n-1)/n), m, 1 );
     cuda_kernel_sbl( p_kernel, 128, 1 );
 }
 static void sflatcgemm_bk_b16( cuda_kernel_t* p_kernel, CUmodule module, int m, int bat, int onc )
 {
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, "dk_sflatcgemm_16x32");
+#endif
     cuda_context_create_kernel( p_kernel, module, "dk_sflatcgemm_16x32" );
     cuda_kernel_sgl( p_kernel, ((bat+15)>>4)*((onc+31)>>5), m, 1 );
     cuda_kernel_sbl( p_kernel, 128, 1 );
 }
 static void sflatcgemm_bk_b32( cuda_kernel_t* p_kernel, CUmodule module, int m, int bat, int onc )
 {
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, "dk_sflatcgemm_32x32");
+#endif
     cuda_context_create_kernel( p_kernel, module, "dk_sflatcgemm_32x32" );
     cuda_kernel_sgl( p_kernel, ((bat+31)>>5)*((onc+31)>>5), m, 1 );
     cuda_kernel_sbl( p_kernel, 256, 1 );

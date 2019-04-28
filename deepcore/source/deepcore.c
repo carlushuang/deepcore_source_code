@@ -29,6 +29,9 @@ DEEPCOREAPIENTRY dc_status_t dc_init()
     }
     for( i=0; (i<g_pPlat->n_devices)&(status==dc_success); ++i ){
         g_pCtx[i].arch=g_pPlat->arch[i];
+#ifdef DC_VERBOSE
+        printf("dc dev:%d, arch:%d\n", i, g_pCtx[i].arch);
+#endif
         status=cuda_context_create(&g_pCtx[i],g_pTemp);
     }
     if(status!=dc_success){
@@ -44,6 +47,9 @@ DEEPCOREAPIENTRY int dc_get_device_count(){ return g_pPlat->n_devices; }
 DEEPCOREAPIENTRY dc_status_t dc_set_device( int dev )
 {
     if((dev<0)|(dev>=g_pPlat->n_devices)) return dc_error_out_of_range;
+#ifdef DC_VERBOSE
+    printf("dc using dev:%d\n",dev);
+#endif
     cuda_context_bind(&g_pCtx[dev]);
     return dc_success;
 }

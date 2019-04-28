@@ -6,7 +6,16 @@
 #include<vector_types.h>
 #include"../idc_macro.h"
 #include"../idc_argmask.h"
-
+#include <stdio.h>
+#ifdef DC_VERBOSE
+#define CU_WARN(call)           \
+    do{                         \
+        CUresult re = call;     \
+        if(re != CUDA_SUCCESS){ \
+            printf("CU error(%d), "#call"\n\t\t%s:%d\n", re, __FILE__, __LINE__);\
+        }                       \
+    }while(0)
+#endif
 typedef struct cuda_kernel{
     CUfunction id;
     uint32_t   gdx;
@@ -40,10 +49,16 @@ INLINE void cuda_kernel_set_smemnb( cuda_kernel_t* p_kernel, uint32_t nb )
 INLINE void cuda_kernel_sgl( cuda_kernel_t* p_kernel, uint32_t gdx, uint32_t gdy, uint32_t gdz )
 {
     p_kernel->gdx=gdx; p_kernel->gdy=gdy; p_kernel->gdz=gdz;
+#ifdef DC_VERBOSE
+    printf("  gri:%dx%dx%d\n",gdx,gdy,gdz);
+#endif
 }
 INLINE void cuda_kernel_sbl( cuda_kernel_t* p_kernel, uint32_t bdx, uint32_t bdy )
 {
     p_kernel->block.x=bdx; p_kernel->block.y=bdy;
+#ifdef DC_VERBOSE
+    printf("  blk:%dx%dx%d\n",bdx,bdy,1);
+#endif
 }
 INLINE void cuda_kernel_sep_ptr( cuda_kernel_t* p_kernel, int i, CUdeviceptr p )
 {
@@ -52,10 +67,16 @@ INLINE void cuda_kernel_sep_ptr( cuda_kernel_t* p_kernel, int i, CUdeviceptr p )
 INLINE void cuda_kernel_sep_i32( cuda_kernel_t* p_kernel, int i, int p )
 {
     *((int*)&p_kernel->args[p_kernel->arg_ofs[i]])=p;
+#ifdef DC_VERBOSE
+    printf("  arg, idx:%d, int:%d\n", i, p);
+#endif
 }
 INLINE void cuda_kernel_sep_f32( cuda_kernel_t* p_kernel, int i, float p )
 {
     *((float*)&p_kernel->args[p_kernel->arg_ofs[i]])=p;
+#ifdef DC_VERBOSE
+    printf("  arg, idx:%d, flt:%f\n", i, p);
+#endif
 }
 INLINE void cuda_kernel_launch( cuda_kernel_t* p, CUstream s )
 {

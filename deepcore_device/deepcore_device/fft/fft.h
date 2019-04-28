@@ -435,6 +435,9 @@
 #define sync
 #endif
 
+// sync issue walk aound
+#define FFT_WA_SM70_SYNC
+
 #include"../activation/activation.h"
 #include"../fft/sfft/sfft.h"
 

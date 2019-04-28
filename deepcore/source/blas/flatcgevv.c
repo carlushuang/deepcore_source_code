@@ -10,6 +10,9 @@ static void sflatcgevv_create_kernel( cuda_kernel_t* p_kernel, const cuda_contex
     nx=1<<(4+x);
     ny=1<<(5+y);
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, knames[i] );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, knames[i]);
+#endif
     cuda_kernel_sao( p_kernel, AM_3P_5S );
     cuda_kernel_sbl( p_kernel, i>0?256:128, 1 );
     cuda_kernel_sgl( p_kernel, ((pnc+nx-1)/nx)*((qnc+ny-1)/ny), slice_size>>4, 1 );

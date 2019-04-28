@@ -13,7 +13,7 @@ INLINE uint32_t idc_bhs( uint32_t n )
 #ifdef _MSC_VER
     _BitScanReverse( &i, n );
 #else
-    i=32-__buildin_clz(n);
+    i=32-__builtin_clz(n);
 #endif
     return i;
 }
@@ -23,7 +23,7 @@ INLINE uint32_t idc_popc( uint32_t n )
 #ifdef _MSC_VER
     i=_mm_popcnt_u32(n);
 #else
-    i=__buildin_popcount(n);
+    i=__builtin_popcount(n);
 #endif
     return i;
 }

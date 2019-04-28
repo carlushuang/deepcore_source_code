@@ -15,6 +15,9 @@ __local_func void idc_create_fft_kernel_r2c( cuda_kernel_t* p_kernel, const cuda
     if(is_ext ){ if(is_split==0){ o=idc_strcat( &kname[o], "_ext" ); } } else
     if(is_pad ){ o=idc_strcat( &kname[o], "_pad"  ); } else
     if(is_flip){ idc_strcat( &kname[o], "_flip" ); }
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, argmask[is_split?2:(axis>2)][is_pad] );
     cuda_kernel_sbl( p_kernel, block_size[axis], 1 );
@@ -31,6 +34,9 @@ __local_func void idc_create_fft_kernel_r2c_opt( cuda_kernel_t* p_kernel, const 
     o+=idc_strcat( &kname[o], "_r2c" );
     if(is_flip){ o+=idc_strcat( &kname[o], "_flip" ); }
     idc_strcat( &kname[o], s_hint[i] );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P );
     cuda_kernel_sbl( p_kernel, block_size[axis-1]+1, 1 );
@@ -53,6 +59,9 @@ __local_func void idc_create_fft_kernel_c2r( cuda_kernel_t* p_kernel, const cuda
         if(relu){ idc_strcat( &kname[o], "_drelu" ); } else
         if(fuse){ idc_strcat( &kname[o], "_xdrv"  ); }
     }
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, argmask[is_split?2:(axis>2)] );
     cuda_kernel_sbl( p_kernel, block_size[axis], 1 );
@@ -66,6 +75,9 @@ __local_func void idc_create_fft_kernel_c2r_grad( cuda_kernel_t* p_kernel, const
     int o=idc_strcat( kname, prc==0?"dk_sfft":"dk_xfft" );
     o+=idc_strcat( &kname[o], s_size[axis] );
     idc_strcat( &kname[o], "_c2r_grad" );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_3S );
     cuda_kernel_sbl( p_kernel, block_size[axis], 1 );
@@ -79,6 +91,9 @@ __local_func void idc_create_fft_kernel_c2r_grad_opt( cuda_kernel_t* p_kernel, c
     int o=idc_strcat( kname, prc==0?"dk_sfft":"dk_xfft" );
     o+=idc_strcat( &kname[o], s_size[axis-1] );
     idc_strcat( &kname[o], i==0?"_c2r_grad_s3":"_c2r_grad_s5" );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_1S );
     cuda_kernel_sbl( p_kernel, block_size[axis-1]+1, 1 );
@@ -97,6 +112,9 @@ __local_func void idc_create_cellfft_kernel_r2c( cuda_kernel_t* p_kernel, const 
     if(is_ext ){ if(perm_id!=2){ idc_strcat( &kname[o], "_ext"  ); } } else
     if(is_pad ){ idc_strcat( &kname[o], "_pad"  ); } else
     if(is_flip){ idc_strcat( &kname[o], "_flip" ); }
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, argmask[perm_id][is_pad] );
     cuda_kernel_sbl( p_kernel, 1<<(7+axis), 1 );
@@ -111,6 +129,9 @@ __local_func void idc_create_cellfft_kernel_r2c_opt( cuda_kernel_t* p_kernel, co
     o+=idc_strcat( &kname[o], "_r2c_perm" );
     if(is_flip){ o+=idc_strcat( &kname[o], "_flip" ); }
     idc_strcat( &kname[o], s_hint[i] );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_2S );
     cuda_kernel_sbl( p_kernel, axis==1?256:512, 1 );
@@ -132,6 +153,9 @@ __local_func void idc_create_cellfft_kernel_c2r( cuda_kernel_t* p_kernel, const 
         if(relu){ idc_strcat( &kname[o], "_drelu" ); } else
         if(fuse){ idc_strcat( &kname[o], "_xdrv"  ); }
     }
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, perm_id!=2?AM_4P_6S:AM_4P_AS );
     cuda_kernel_sbl( p_kernel, axis==0?128:256, 1 );
@@ -144,6 +168,9 @@ __local_func void idc_create_cellfft_kernel_c2r_grad( cuda_kernel_t* p_kernel, c
     int o=idc_strcat( kname, prc==0?"dk_sfft":"dk_xfft" );
     o+=idc_strcat( &kname[o], s_size[axis] );
     idc_strcat( &kname[o], "_c2r_grad_perm" );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_5S );
     cuda_kernel_sbl( p_kernel, axis==0?128:256, 1 );
@@ -156,6 +183,9 @@ __local_func void idc_create_cellfft_kernel_c2r_grad_opt( cuda_kernel_t* p_kerne
     o+=idc_strcat( &kname[o], axis==1?"16x16":"32x32" );
     o+=idc_strcat( &kname[o], "_c2r_grad_perm" );
     idc_strcat( &kname[o], i==0?"_s3":"_s5" );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_3S );
     cuda_kernel_sbl( p_kernel, 256, 1 );

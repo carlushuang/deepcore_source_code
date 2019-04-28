@@ -17,6 +17,9 @@ static void scgemm_create_kernel( cuda_kernel_t* p_kernel, const cuda_context_t*
     axis_y+=5;
     nbx=(anr+(1<<axis_x)-1)>>axis_x;
     nby=(cnc+(1<<axis_y)-1)>>axis_y;
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, kname);
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, kname );
     cuda_kernel_sao( p_kernel, AM_3P_7S );
     cuda_kernel_sbl( p_kernel, (1<<(axis_x+axis_y))>>4, 1 );

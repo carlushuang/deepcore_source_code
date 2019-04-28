@@ -2,6 +2,9 @@
 
 __local_func void idc_cgemv_create_kernel( cuda_kernel_t* p_kernel, const cuda_context_t* p_ctx, int bat, int nr, int nc, int lda, int ldb, int ldc )
 {
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, "dk_scgemv");
+#endif
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, "dk_scgemv" );
     cuda_kernel_sao( p_kernel, AM_3P_6S );
     cuda_kernel_sgl( p_kernel, (nr+127)>>7, bat, 1 );

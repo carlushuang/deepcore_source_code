@@ -5,6 +5,9 @@ __local_func void idc_cgevv_create_kernel( cuda_kernel_t* p_kernel, const cuda_c
     uint32_t dx=((nx+31)>>5);
     uint32_t dy=((ny+31)>>5);
     cuda_context_create_kernel( p_kernel, p_ctx->module_fftconv, "dk_scgevv" );
+#ifdef DC_VERBOSE
+    printf("[%s] kernel name:%s\n", __func__, "dk_scgevv");
+#endif
     cuda_kernel_sao( p_kernel, AM_3P_7S );
     cuda_kernel_sgl( p_kernel, dx*dy, bat, 1 );
     cuda_kernel_sbl( p_kernel, 32, 1 );
