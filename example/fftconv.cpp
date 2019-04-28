@@ -26,11 +26,12 @@ int main()
 	dc_set_device(0);
 
 	//tensor_shape_t shapes[]={{48,3,32,64,8},{40,3,32,64,1},{24,3,32,64,32},{18,3,32,32,1},{10,3,32,32,32}};
-	tensor_shape_t shapes[]={{27,5,64,192,60,2},{13,3,192,384,60,1}};
-	int dir=0;
-	for(dir=0; dir<1; ++dir )
+	tensor_shape_t shapes[]={{27,5,64,192,512,2} , {13,3,192,384,512,1}, {13,3,384,384,512,1}, {13,3,384,256,512,1}};
+
+	for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++  )
 	{
-		for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++ )
+		int dir=0;
+		for(  dir=0; dir<2; ++dir )
 		{
 			printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
 			int pn=shapes[e].ds;
@@ -88,7 +89,7 @@ int main()
 			for( int i=0; i<fn*fn*pnc*qnc; ++i ){
 				b[i]=((float)rand())/RAND_MAX;
 			}
-#if 1
+#if 0
 			printf(AP"  start cpu caculation...");
 			for( int i=0; i<onc; ++i ){
 				for( int s=0; s<bat; ++s ){
@@ -101,11 +102,34 @@ int main()
 			dc_tensor_store( d_b, kshape, b, pnc*fn*fn*sizeof(float), pnc*fn*fn*sizeof(float), qnc, NULL );
 			bool is_ok;
 
-			if(dc_fftconv( Op, (void*)auxbuf, d_c, d_a, d_b, NULL, 1.f, NULL )!=dc_success){
-				printf( AP"error: conv exec failed!\n" );
-                                is_ok = false;
-				goto __LAB0;
+			CUevent evt_0, evt_1;
+			cuEventCreate(&evt_0, CU_EVENT_DEFAULT);
+			cuEventCreate(&evt_1, CU_EVENT_DEFAULT);
+
+#define WARMUP 3
+			for(int i=0;i<WARMUP;i++){
+				if(dc_fftconv( Op, (void*)auxbuf, d_c, d_a, d_b, NULL, 1.f, NULL )!=dc_success){
+					printf( AP"error: conv exec failed!\n" );
+					is_ok = false;
+					goto __LAB0;
+				}
 			}
+			cuCtxSynchronize();
+			cuEventRecord(evt_0, NULL);
+#define LOOP 8
+			for(int i=0;i<LOOP;i++){
+				if(dc_fftconv( Op, (void*)auxbuf, d_c, d_a, d_b, NULL, 1.f, NULL )!=dc_success){
+					printf( AP"error: conv exec failed!\n" );
+					is_ok = false;
+					goto __LAB0;
+				}
+			}
+			cuEventRecord(evt_1, NULL);
+			cuEventSynchronize(evt_1);
+			cuCtxSynchronize();
+			float elapsed_ms;
+			cuEventElapsedTime(&elapsed_ms, evt_0, evt_1);
+			printf( AP"examples[%d][%d] cost:%f ms\n", dir, e ,elapsed_ms/LOOP);
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );
 			cuCtxSynchronize();
@@ -119,6 +143,8 @@ int main()
 			}
 
 		__LAB0:
+			cuEventDestroy(evt_0);
+			cuEventDestroy(evt_1);
 			dc_release_tensor( d_a );
 			dc_release_tensor( d_b );
 			dc_release_tensor( d_c );
@@ -128,7 +154,7 @@ int main()
 			delete[] b;
 			delete[] c;
 			delete[] d;
-			if(!is_ok) break;
+			//if(!is_ok) break;
 		}
 	}
 	dc_exit();

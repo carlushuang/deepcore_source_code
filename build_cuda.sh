@@ -2,7 +2,7 @@
 PWD=`pwd`
 NVCC=/usr/local/cuda/bin/nvcc
 NVCC_FLAGS="--fatbin -gencode arch=compute_70,code=sm_70 --ptxas-options=-v -Xptxas -disable-optimizer-consts "
-NVCC_FLAGS="$NVCC_FLAGS -G "
+# NVCC_FLAGS="$NVCC_FLAGS -G "
 WD=deepcore_device/deepcore_device/
 SRC=deepcore_device.cu
 BUILD_DIR=$PWD/build
@@ -30,7 +30,7 @@ if [ $B1 ] ;then
 WD=deepcore
 CC=gcc
 CFLAGS=" -I/usr/local/cuda/include -std=c99 -Wall -O2 -shared -fPIC "
-CFLAGS=" $CFLAGS -DDC_VERBOSE"
+#CFLAGS=" $CFLAGS -DDC_VERBOSE"
 LDFLAGS=" -L/usr/local/cuda/lib64 -lcuda -lcudart "
 TARGET=libdeepcore.so
 
