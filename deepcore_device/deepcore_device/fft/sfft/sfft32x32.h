@@ -42,15 +42,15 @@ __device__ __forceinline__ void s_hfft( float2* c, float* sst, float* sld, const
     }
     PERMUTE(16,sst,sld,c,1,34,perm_mask)
 #ifdef FFT_WA_SM70_SYNC
-    float c0_y = c[0].y;
     temp.x=0.5f*SHFL(c[0].x,32-x,32);
     temp.y=0.5f*SHFL(c[0].y,32-x,32);
-    c[16].x=( 0.5f)*c[0].y+temp.y;
-    c[16].y=(-0.5f)*c[0].x+temp.x;
-    c[ 0].x=0.5f*c[0].x+( temp.x);
-    c[ 0].y=0.5f*c[0].y+(-temp.y);
-    if(x==0){
-        c[16].x=c0_y;
+    if(x>0){
+        c[16].x=( 0.5f)*c[0].y+temp.y;
+        c[16].y=(-0.5f)*c[0].x+temp.x;
+        c[ 0].x=0.5f*c[0].x+( temp.x);
+        c[ 0].y=0.5f*c[0].y+(-temp.y);
+    } else {
+        c[16].x=c[0].y;
         c[16].y=c[0].y=0.f;
     }
 #else
@@ -210,15 +210,15 @@ __device__ __forceinline__ void s_hfft_s3( float2* c, float* sst, float* sld, co
     }
     PERMUTE(16,sst,sld,c,1,34,perm_mask)
 #ifdef FFT_WA_SM70_SYNC
-    float c0_y = c[0].y;
     temp.x=0.5f*SHFL(c[0].x,32-x,32);
     temp.y=0.5f*SHFL(c[0].y,32-x,32);
-    c[16].x=( 0.5f)*c[0].y+temp.y;
-    c[16].y=(-0.5f)*c[0].x+temp.x;
-    c[ 0].x=0.5f*c[0].x+( temp.x);
-    c[ 0].y=0.5f*c[0].y+(-temp.y);
-    if(x==0){
-        c[16].x=c0_y;
+    if(x>0){
+        c[16].x=( 0.5f)*c[0].y+temp.y;
+        c[16].y=(-0.5f)*c[0].x+temp.x;
+        c[ 0].x=0.5f*c[0].x+( temp.x);
+        c[ 0].y=0.5f*c[0].y+(-temp.y);
+    } else {
+        c[16].x=c[0].y;
         c[16].y=c[0].y=0.f;
     }
 #else
@@ -286,15 +286,15 @@ __device__ __forceinline__ void s_hfft_s5( float2* c, float* sst, float* sld, co
     }
     PERMUTE(16,sst,sld,c,1,34,perm_mask)
 #ifdef FFT_WA_SM70_SYNC
-    float c0_y = c[0].y;
     temp.x=0.5f*SHFL(c[0].x,32-x,32);
     temp.y=0.5f*SHFL(c[0].y,32-x,32);
-    c[16].x=( 0.5f)*c[0].y+temp.y;
-    c[16].y=(-0.5f)*c[0].x+temp.x;
-    c[ 0].x=0.5f*c[0].x+( temp.x);
-    c[ 0].y=0.5f*c[0].y+(-temp.y);
-    if(x==0){
-        c[16].x=c0_y;
+    if(x>0){
+        c[16].x=( 0.5f)*c[0].y+temp.y;
+        c[16].y=(-0.5f)*c[0].x+temp.x;
+        c[ 0].x=0.5f*c[0].x+( temp.x);
+        c[ 0].y=0.5f*c[0].y+(-temp.y);
+    } else {
+        c[16].x=c[0].y;
         c[16].y=c[0].y=0.f;
     }
 #else
@@ -364,15 +364,15 @@ __device__ __forceinline__ void s_hfft_s7( float2* c, float* sst, float* sld, co
     }
     PERMUTE(16,sst,sld,c,1,34,perm_mask)
 #ifdef FFT_WA_SM70_SYNC
-    float c0_y = c[0].y;
     temp.x=0.5f*SHFL(c[0].x,32-x,32);
     temp.y=0.5f*SHFL(c[0].y,32-x,32);
-    c[16].x=( 0.5f)*c[0].y+temp.y;
-    c[16].y=(-0.5f)*c[0].x+temp.x;
-    c[ 0].x=0.5f*c[0].x+( temp.x);
-    c[ 0].y=0.5f*c[0].y+(-temp.y);
-    if(x==0){
-        c[16].x=c0_y;
+    if(x>0){
+        c[16].x=( 0.5f)*c[0].y+temp.y;
+        c[16].y=(-0.5f)*c[0].x+temp.x;
+        c[ 0].x=0.5f*c[0].x+( temp.x);
+        c[ 0].y=0.5f*c[0].y+(-temp.y);
+    } else {
+        c[16].x=c[0].y;
         c[16].y=c[0].y=0.f;
     }
 #else

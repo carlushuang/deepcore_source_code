@@ -42,15 +42,15 @@ __device__ __forceinline__ void s_hfft8( float2* c, float* sst, float* sld, cons
     }
     PERMUTE(4,sst,sld,c,1,10,perm_mask)
 #ifdef FFT_WA_SM70_SYNC
-    float c0_y = c[0].y;
     temp.x=0.5f*SHFL(c[0].x,8-x,8);
     temp.y=0.5f*SHFL(c[0].y,8-x,8);
-    c[4].x=( 0.5f)*c[0].y+temp.y;
-    c[4].y=(-0.5f)*c[0].x+temp.x;
-    c[0].x=0.5f*c[0].x+( temp.x);
-    c[0].y=0.5f*c[0].y+(-temp.y);
-    if(x==0){
-        c[4].x=c0_y;
+    if(x>0){
+        c[4].x=( 0.5f)*c[0].y+temp.y;
+        c[4].y=(-0.5f)*c[0].x+temp.x;
+        c[0].x=0.5f*c[0].x+( temp.x);
+        c[0].y=0.5f*c[0].y+(-temp.y);
+    } else {
+        c[4].x=c[0].y;
         c[4].y=c[0].y=0.f;
     }
 #else
