@@ -22,7 +22,11 @@
 #endif
 
 #include<stdint.h>
+#ifdef __HIPCC__
+#include <hip/hip_runtime.h>
+#else
 #include<cuda.h>
+#endif
 
 #define dcMaskDirectionForward  0x00000000
 #define dcMaskDirectionBackward 0x00000001
@@ -60,6 +64,12 @@ typedef enum dc_status{
     dc_error_unsupported
 } dc_status_t;
 
+#ifdef __HIPCC__
+#define dc_stream_t hipStream_t
+#else
+#define dc_stream_t CUstream
+#endif
+
 DEEPCOREAPIENTRY dc_status_t      dc_init();
 DEEPCOREAPIENTRY int              dc_get_device_count();
 DEEPCOREAPIENTRY dc_status_t      dc_set_device( int );
@@ -68,24 +78,24 @@ DEEPCOREAPIENTRY dc_tensorshape_t dc_create_tensor_shape_filter( int, uint32_t, 
 DEEPCOREAPIENTRY dc_tensorshape_t dc_create_tensor_shape_linear( size_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_tensor( void**, dc_tensorshape_t );
 DEEPCOREAPIENTRY dc_status_t      dc_release_tensor( void* );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_zero( void*, dc_tensorshape_t, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_subzero( void*, dc_tensorshape_t, size_t, size_t, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_copy( void*, dc_tensorshape_t, const void*, dc_tensorshape_t, size_t, size_t, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_subcopy( void*, dc_tensorshape_t, const void*, dc_tensorshape_t, size_t, size_t, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_store( void*, dc_tensorshape_t, const void*, size_t, size_t, size_t, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_tensor_load( void*, size_t, const void*, dc_tensorshape_t, size_t, size_t, CUstream );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_zero( void*, dc_tensorshape_t, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_subzero( void*, dc_tensorshape_t, size_t, size_t, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_copy( void*, dc_tensorshape_t, const void*, dc_tensorshape_t, size_t, size_t, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_subcopy( void*, dc_tensorshape_t, const void*, dc_tensorshape_t, size_t, size_t, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_store( void*, dc_tensorshape_t, const void*, size_t, size_t, size_t, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_tensor_load( void*, size_t, const void*, dc_tensorshape_t, size_t, size_t, dc_stream_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_fftconvOp( dc_fftconvOp*, size_t*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t, uint32_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_fftconvOp_grad( dc_fftconvOp*, size_t*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_cellconvOp( dc_cellconvOp*, size_t*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t, uint32_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_cellconvOp_grad( dc_cellconvOp*, size_t*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_gemmOp( dc_gemmOp*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t );
 DEEPCOREAPIENTRY dc_status_t      dc_create_gemmOp_grad( dc_gemmOp*, uint32_t, int, dc_tensorshape_t, dc_tensorshape_t, dc_tensorshape_t );
-DEEPCOREAPIENTRY dc_status_t      dc_fftconv( dc_fftconvOp, void*, void*, const void*, const void*, const void*, float, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_fftconv_grad( dc_fftconvOp, void*, void*, const void*, const void*, float, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_cellconv( dc_cellconvOp, void*, void*, const void*, const void*, const void*, float, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_cellconv_grad( dc_cellconvOp, void*, void*, const void*, const void*, float, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_gemm( dc_gemmOp, void*, const void*, const void*, const void*, float, CUstream );
-DEEPCOREAPIENTRY dc_status_t      dc_gemm_grad( dc_gemmOp, void*, const void*, const void*, float, CUstream );
+DEEPCOREAPIENTRY dc_status_t      dc_fftconv( dc_fftconvOp, void*, void*, const void*, const void*, const void*, float, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_fftconv_grad( dc_fftconvOp, void*, void*, const void*, const void*, float, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_cellconv( dc_cellconvOp, void*, void*, const void*, const void*, const void*, float, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_cellconv_grad( dc_cellconvOp, void*, void*, const void*, const void*, float, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_gemm( dc_gemmOp, void*, const void*, const void*, const void*, float, dc_stream_t );
+DEEPCOREAPIENTRY dc_status_t      dc_gemm_grad( dc_gemmOp, void*, const void*, const void*, float, dc_stream_t );
 DEEPCOREAPIENTRY dc_status_t      dc_destroy_fftconvOp( dc_fftconvOp );
 DEEPCOREAPIENTRY dc_status_t      dc_destroy_cellconvOp( dc_cellconvOp );
 DEEPCOREAPIENTRY dc_status_t      dc_destroy_gemmOp( dc_gemmOp );

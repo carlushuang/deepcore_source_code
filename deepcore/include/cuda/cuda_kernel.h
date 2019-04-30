@@ -2,8 +2,13 @@
 #define __cuda_kernel_h__
 
 #include<stdint.h>
+#ifdef __HIPCC__
+#include <hip/hip_runtime.h>
+#include <hip/hip_vector_types.h>
+#else
 #include<cuda.h>
 #include<vector_types.h>
+#endif
 #include"../idc_macro.h"
 #include"../idc_argmask.h"
 #include <stdio.h>
@@ -17,7 +22,11 @@
     }while(0)
 #endif
 typedef struct cuda_kernel{
+#ifdef __HIPCC__
+    hipFunction_t id;
+#else
     CUfunction id;
+#endif
     uint32_t   gdx;
     uint32_t   gdy;
     uint32_t   gdz;
@@ -35,7 +44,11 @@ INLINE void cuda_kernel_sao( cuda_kernel_t* p, uint32_t mask )
     do{
         p->arg_ofs[i++]=(uint8_t)ofs;
         if((k&0x3)==PA){
+#ifdef __HIPCC__
+            ofs=IDC_AFFIS(ofs,__alignof(hipDeviceptr_t)); ofs+=sizeof(hipDeviceptr_t); 
+#else
             ofs=IDC_AFFIS(ofs,__alignof(CUdeviceptr)); ofs+=sizeof(CUdeviceptr); 
+#endif
         } else {
             ofs=IDC_AFFIS(ofs,__alignof(int32_t)); ofs+=__alignof(int32_t);
         }
@@ -60,10 +73,17 @@ INLINE void cuda_kernel_sbl( cuda_kernel_t* p_kernel, uint32_t bdx, uint32_t bdy
     printf("  blk:%dx%dx%d\n",bdx,bdy,1);
 #endif
 }
+#ifdef __HIPCC__
+INLINE void cuda_kernel_sep_ptr( cuda_kernel_t* p_kernel, int i, hipDeviceptr_t p )
+{
+    *((hipDeviceptr_t*)&p_kernel->args[p_kernel->arg_ofs[i]])=p;
+}
+#else
 INLINE void cuda_kernel_sep_ptr( cuda_kernel_t* p_kernel, int i, CUdeviceptr p )
 {
     *((CUdeviceptr*)&p_kernel->args[p_kernel->arg_ofs[i]])=p;
 }
+#endif
 INLINE void cuda_kernel_sep_i32( cuda_kernel_t* p_kernel, int i, int p )
 {
     *((int*)&p_kernel->args[p_kernel->arg_ofs[i]])=p;
@@ -78,9 +98,16 @@ INLINE void cuda_kernel_sep_f32( cuda_kernel_t* p_kernel, int i, float p )
     printf("  arg, idx:%d, flt:%f\n", i, p);
 #endif
 }
+#ifdef __HIPCC__
+INLINE void cuda_kernel_launch( cuda_kernel_t* p, hipStream_t s )
+{
+    hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+}
+#else
 INLINE void cuda_kernel_launch( cuda_kernel_t* p, CUstream s )
 {
     cuLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
 }
+#endif
 
 #endif

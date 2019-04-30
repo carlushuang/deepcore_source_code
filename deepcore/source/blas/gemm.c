@@ -68,7 +68,11 @@ __local_func void idc_gemm_createOp_grad( idc_gemmOp_t* Op, const cuda_context_t
 {
     sgemmrc_create_kernel( Op, p_ctx, mask, ng, anr, bnr, cnc, lda, ldb, ldc );
 }
+#ifdef __HIPCC__
+__local_func void idc_gemm( idc_gemmOp_t* Op, hipDeviceptr_t d_c, hipDeviceptr_t d_a, hipDeviceptr_t d_b, hipDeviceptr_t d_x, float alpha, hipStream_t s )
+#else
 __local_func void idc_gemm( idc_gemmOp_t* Op, CUdeviceptr d_c, CUdeviceptr d_a, CUdeviceptr d_b, CUdeviceptr d_x, float alpha, CUstream s )
+#endif
 {
     cuda_kernel_t* p=&Op->kernel;
     cuda_kernel_sep_ptr( p, 0, d_c   );
@@ -78,7 +82,11 @@ __local_func void idc_gemm( idc_gemmOp_t* Op, CUdeviceptr d_c, CUdeviceptr d_a, 
     cuda_kernel_sep_f32( p, 4, alpha );
     cuda_kernel_launch( p, s );
 }
+#ifdef __HIPCC__
+__local_func void idc_gemm_grad( idc_gemmOp_t* Op, hipDeviceptr_t d_c, hipDeviceptr_t d_a, hipDeviceptr_t d_b, float scale, hipStream_t s )
+#else
 __local_func void idc_gemm_grad( idc_gemmOp_t* Op, CUdeviceptr d_c, CUdeviceptr d_a, CUdeviceptr d_b, float scale, CUstream s )
+#endif
 {
     cuda_kernel_t* p=&Op->kernel;
     cuda_kernel_sep_ptr( p, 0, d_c   );

@@ -2,7 +2,11 @@
 #define __idc_fft_calcRF_h__
 
 #include<math.h>
+#ifdef __HIPCC__
+#include <hip/hip_vector_types.h>
+#else
 #include<vector_types.h>
+#endif
 #include"../idc_macro.h"
 
 #define PI 3.1415926535897931e+0

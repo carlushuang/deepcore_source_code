@@ -1,7 +1,11 @@
 #ifndef __half_h__
 #define __half_h__
 
+#ifdef __HIPCC__
+#include<hip/hip_fp16.h>
+#else
 #include<cuda_fp16.h>
+#endif
 
 #define HZERO       __float2half2_rn(0.f)
 #define HLO(x)      __low2half(x)
@@ -12,6 +16,7 @@
 #define HIX(x)      __halves2half2(__hneg(HLO(x)),HHI(x))
 #define HIY(x)      __halves2half2(HLO(x),__hneg(HHI(x)))
 
+#ifndef __HIPCC__
 typedef struct __align__( 8) __half4__{ __half2 x; __half2 y;   } __half4;
 typedef struct __align__(16) __half8__{ __half4 lo; __half4 hi; } __half8;
 
@@ -62,6 +67,7 @@ __device__ __forceinline__ unsigned int __half2_as_uint( __half2 h )
 {
     return h.x;
 }
+#endif
 __device__ __forceinline__ float operator+( float a, __half b )
 {
     return (a+__half2float(b));

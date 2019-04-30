@@ -36,7 +36,11 @@ __local_func void idc_cgemm_create_kernel( cuda_kernel_t* p_kernel, const cuda_c
 {
     scgemm_create_kernel( p_kernel, p_ctx, bat, anr, bnr, cnc, lda, ldb );
 }
+#ifdef __HIPCC__
+__local_func void idc_cgemm( cuda_kernel_t* p_kernel, hipDeviceptr_t d_c, hipDeviceptr_t d_a, hipDeviceptr_t d_b, hipStream_t s )
+#else
 __local_func void idc_cgemm( cuda_kernel_t* p_kernel, CUdeviceptr d_c, CUdeviceptr d_a, CUdeviceptr d_b, CUstream s )
+#endif
 {
     cuda_kernel_sep_ptr( p_kernel, 0, d_c );
     cuda_kernel_sep_ptr( p_kernel, 1, d_a );

@@ -201,6 +201,34 @@ __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_c
     Op->divpt[1]=n*npc*qnc;
     return (Op->divpt[0]+Op->divpt[1]+n*pnc*qnc);
 }
+#ifdef __HIPCC__
+__local_func void idc_fftconv( idc_fftconvOp_t* Op, hipDeviceptr_t d_aux, hipDeviceptr_t d_target, hipDeviceptr_t d_source, hipDeviceptr_t d_filter, hipDeviceptr_t d_x, float alpha, hipStream_t s )
+{
+    uint32_t g;
+    for( g=0; g<Op->ng; ++g ){
+        hipDeviceptr_t d_a=d_aux;
+        hipDeviceptr_t d_b=d_a+Op->divpt[0];
+        hipDeviceptr_t d_c=d_b+Op->divpt[1];
+        idc_fft2d_r2c( &Op->kfft[0], d_a, d_source+g*Op->ags, s );
+        idc_fft2d_r2c( &Op->kfft[1], d_b, d_filter+g*Op->bgs, s );
+        idc_cgemm( &Op->kcgemm, d_c, d_a, d_b, s );
+        idc_fft2d_c2r( &Op->kfft[2], d_target+g*Op->cgs, d_c, d_x, alpha, s );
+    }
+}
+__local_func void idc_fftconv_grad( idc_fftconvOp_t* Op, hipDeviceptr_t d_aux, hipDeviceptr_t d_z, hipDeviceptr_t d_x, hipDeviceptr_t d_y, float scale, hipStream_t s )
+{
+    uint32_t g;
+    for( g=0; g<Op->ng; ++g ){
+        hipDeviceptr_t d_a=d_aux;
+        hipDeviceptr_t d_b=d_a+Op->divpt[0];
+        hipDeviceptr_t d_c=d_b+Op->divpt[1];
+        idc_fft2d_r2c( &Op->kfft[0], d_a, d_x+g*Op->ags, s );
+        idc_fft2d_r2c( &Op->kfft[1], d_b, d_y+g*Op->bgs, s );
+        idc_cgemm( &Op->kcgemm, d_c, d_a, d_b, s );
+        idc_fft2d_c2r_grad( &Op->kfft[2], d_z+g*Op->cgs, d_c, scale, s );
+    }
+}
+#else
 __local_func void idc_fftconv( idc_fftconvOp_t* Op, CUdeviceptr d_aux, CUdeviceptr d_target, CUdeviceptr d_source, CUdeviceptr d_filter, CUdeviceptr d_x, float alpha, CUstream s )
 {
     uint32_t g;
@@ -227,3 +255,4 @@ __local_func void idc_fftconv_grad( idc_fftconvOp_t* Op, CUdeviceptr d_aux, CUde
         idc_fft2d_c2r_grad( &Op->kfft[2], d_z+g*Op->cgs, d_c, scale, s );
     }
 }
+#endif

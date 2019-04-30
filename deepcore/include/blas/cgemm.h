@@ -10,6 +10,10 @@ __local_func void idc_cgemv_create_kernel( cuda_kernel_t*, const cuda_context_t*
 __local_func void idc_cgevv_create_kernel( cuda_kernel_t*, const cuda_context_t*, int, int, int, int, int );
 __local_func void idc_flatcgemm_create_kernel( cuda_kernel_t*, const cuda_context_t*, int, int, int, int, int );
 __local_func void idc_flatcgevv_create_kernel( cuda_kernel_t*, const cuda_context_t*, int, int, int, int );
+#ifdef __HIPCC__
+__local_func void idc_cgemm( cuda_kernel_t*, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, hipStream_t );
+#else
 __local_func void idc_cgemm( cuda_kernel_t*, CUdeviceptr, CUdeviceptr, CUdeviceptr, CUstream );
+#endif
 
 #endif

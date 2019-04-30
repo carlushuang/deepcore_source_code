@@ -427,6 +427,14 @@
     LOAD8x2(c,sld,m,n,.y)   if(mask&0x8){ __syncthreads(); }\
 }
 
+
+#ifdef __HIPCC__
+
+#define perm_mask 0x0
+#define sync
+
+#else
+
 #if CUDA_ARCH>=70
 #define perm_mask 0x7
 #define sync      __syncwarp();
@@ -434,6 +442,7 @@
 #define perm_mask 0x0
 #define sync
 #endif
+#endif //__HIPCC__
 
 // sync issue walk aound
 #define FFT_WA_SM70_SYNC

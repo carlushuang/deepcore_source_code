@@ -17,6 +17,8 @@
 	}while(0)
 
 #define AP "[fftconv]"
+#define WARMUP 3
+#define LOOP 8
 
 int main()
 {
@@ -26,12 +28,16 @@ int main()
 	dc_set_device(0);
 
 	//tensor_shape_t shapes[]={{48,3,32,64,8},{40,3,32,64,1},{24,3,32,64,32},{18,3,32,32,1},{10,3,32,32,32}};
-	tensor_shape_t shapes[]={{27,5,64,192,512,2} , {13,3,192,384,512,1}, {13,3,384,384,512,1}, {13,3,384,256,512,1}};
+	//tensor_shape_t shapes[]={{27,5,64,192,512,2} , {13,3,192,384,512,1}, {13,3,384,384,512,1}, {13,3,384,256,512,1}};
+	tensor_shape_t shapes[]={
+		{13,3,384,384,512,1},{27,3,384,384,512,1},{55,3,384,384,256,1},{96,3,384,384,64,1},
+		{13,5,384,384,512,2},{27,5,64 ,192,512,2},{55,5,64 ,192,256,2},{96,5,64 ,192,64,2},
+		{13,7,384,384,128,3},{27,7,384,384,128,3},{55,7,384,384,128,3},{96,7,384,384,64,3}};
 
 	for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++  )
 	{
 		int dir=0;
-		for(  dir=0; dir<2; ++dir )
+		for(  dir=0; dir<1; ++dir )
 		{
 			printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
 			int pn=shapes[e].ds;
@@ -62,14 +68,22 @@ int main()
 
 
 			void *d_a, *d_b, *d_c;
+#ifdef __HIPCC__
+			hipDeviceptr_t auxbuf;
+#else
 			CUdeviceptr auxbuf;
+#endif
 			dc_create_tensor( (void**)&d_a, ishape );
 			dc_create_tensor( (void**)&d_b, kshape );
 			dc_create_tensor( (void**)&d_c, oshape );
+#ifdef __HIPCC__
+			hipMalloc(&auxbuf, auxnb);
+#else
 			cuMemAlloc( &auxbuf, auxnb );
+#endif
 			char auxnb_str[20];
 			b2s(auxnb, auxnb_str);
-			printf(AP"  aux buffer size:%d(%s)\n", auxnb, auxnb_str);
+			printf(AP"  aux buffer size:%llu(%s)\n", auxnb, auxnb_str);
 
 			float* a=new float[bat*inc*in*in];
 			float* b=new float[qnc*pnc*fn*fn];
@@ -101,12 +115,17 @@ int main()
 			dc_tensor_store( d_a, ishape, a, bat*in*in*sizeof(float), bat*in*in*sizeof(float), inc, NULL );
 			dc_tensor_store( d_b, kshape, b, pnc*fn*fn*sizeof(float), pnc*fn*fn*sizeof(float), qnc, NULL );
 			bool is_ok;
-
+#ifdef __HIPCC__
+			hipEvent_t evt_0, evt_1;
+			hipEventCreate(&evt_0);
+			hipEventCreate(&evt_1);
+#else
 			CUevent evt_0, evt_1;
 			cuEventCreate(&evt_0, CU_EVENT_DEFAULT);
 			cuEventCreate(&evt_1, CU_EVENT_DEFAULT);
+#endif
 
-#define WARMUP 3
+
 			for(int i=0;i<WARMUP;i++){
 				if(dc_fftconv( Op, (void*)auxbuf, d_c, d_a, d_b, NULL, 1.f, NULL )!=dc_success){
 					printf( AP"error: conv exec failed!\n" );
@@ -114,9 +133,14 @@ int main()
 					goto __LAB0;
 				}
 			}
+#ifdef __HIPCC__
+			hipCtxSynchronize();
+			hipEventRecord(evt_0, NULL);
+#else
 			cuCtxSynchronize();
 			cuEventRecord(evt_0, NULL);
-#define LOOP 8
+#endif
+
 			for(int i=0;i<LOOP;i++){
 				if(dc_fftconv( Op, (void*)auxbuf, d_c, d_a, d_b, NULL, 1.f, NULL )!=dc_success){
 					printf( AP"error: conv exec failed!\n" );
@@ -124,32 +148,44 @@ int main()
 					goto __LAB0;
 				}
 			}
+			float elapsed_ms;
+#ifdef __HIPCC__
+			hipEventRecord(evt_1, NULL);
+			hipEventSynchronize(evt_1);
+			hipCtxSynchronize();
+			hipEventElapsedTime(&elapsed_ms, evt_0, evt_1);
+#else
 			cuEventRecord(evt_1, NULL);
 			cuEventSynchronize(evt_1);
 			cuCtxSynchronize();
-			float elapsed_ms;
 			cuEventElapsedTime(&elapsed_ms, evt_0, evt_1);
-			printf( AP"examples[%d][%d] cost:%f ms\n", dir, e ,elapsed_ms/LOOP);
+#endif
+			printf( AP"examples[%d][%d] cost:%f ms, ", dir, e ,elapsed_ms/LOOP);
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );
+#ifdef __HIPCC__
+			hipCtxSynchronize();
+#else
 			cuCtxSynchronize();
+#endif
 
 			is_ok=check( c, d, bat*onc*on*on );
-			if(!is_ok){
-				printf( AP"examples[%d][%d] is compute failed!\n", dir, e );
-				goto __LAB0;
-			}else{
-				printf( AP"examples[%d][%d] is compute ok\n", dir, e );
-			}
+			printf("compute %s\n",is_ok?"ok":"fail");
 
 		__LAB0:
+#ifdef __HIPCC__
+			hipEventDestroy(evt_0);
+			hipEventDestroy(evt_1);
+			hipFree(auxbuf);
+#else
 			cuEventDestroy(evt_0);
 			cuEventDestroy(evt_1);
+			cuMemFree(auxbuf);
+#endif
 			dc_release_tensor( d_a );
 			dc_release_tensor( d_b );
 			dc_release_tensor( d_c );
 			dc_destroy_fftconvOp(Op);
-			cuMemFree(auxbuf);
 			delete[] a;
 			delete[] b;
 			delete[] c;

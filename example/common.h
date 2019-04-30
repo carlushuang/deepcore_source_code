@@ -59,13 +59,13 @@ void inline b2s(size_t bytes, char * str){
 	if(bytes<1024){
 		sprintf(str, "%lluB", bytes);
 	}else if(bytes<(1024*1024)){
-		float b= (float)bytes/1024.0;
+		double b= (double)bytes/1024.0;
 		sprintf(str, "%.3fKB", b);
 	}else if(bytes<(1024*1024*1024)){
-		float b= (float)bytes/(1024.0*1024);
+		double b= (double)bytes/(1024.0*1024);
 		sprintf(str, "%.3fMB", b);
 	}else{
-		float b= (float)bytes/(1024.0*1024*1024);
+		double b= (double)bytes/(1024.0*1024*1024);
 		sprintf(str, "%.3fGB", b);
 	}
 }

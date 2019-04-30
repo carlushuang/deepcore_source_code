@@ -14,7 +14,11 @@ typedef struct idc_gemmOp{
 
 __local_func void idc_gemm_createOp( idc_gemmOp_t*, const cuda_context_t*, uint32_t, int, int, int, int, int, int, int );
 __local_func void idc_gemm_createOp_grad( idc_gemmOp_t*, const cuda_context_t*, uint32_t, int, int, int, int, int, int, int );
+#ifdef __HIPCC__
+__local_func void idc_gemm( idc_gemmOp_t*, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, float, hipStream_t );
+__local_func void idc_gemm_grad( idc_gemmOp_t*, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, float, hipStream_t );
+#else
 __local_func void idc_gemm( idc_gemmOp_t*, CUdeviceptr, CUdeviceptr, CUdeviceptr, CUdeviceptr, float, CUstream );
 __local_func void idc_gemm_grad( idc_gemmOp_t*, CUdeviceptr, CUdeviceptr, CUdeviceptr, float, CUstream );
-
+#endif
 #endif

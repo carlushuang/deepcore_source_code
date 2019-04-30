@@ -1,12 +1,45 @@
 #include"../../include/cuda/cuda_platform.h"
 #include"../../include/idc_status.h"
 
+#ifdef __HIPCC__
+static int __get_devices( hipDevice_t * const p_device, int* const p_arch  )
+{
+    struct{ int x, y; } cc;
+    int n_valided, n_devices, gcn;
+    hipDevice_t device;
+    hipGetDeviceCount(&n_devices);
+    if( n_devices<=0 ) return -1;
+    int i;
+    for(i=0, n_valided=0; i<n_devices; ++i){
+        hipDeviceGet(&device, i);
+        hipDeviceGetAttribute(&cc.x, hipDeviceAttributeComputeCapabilityMajor, i);
+        hipDeviceGetAttribute(&cc.y, hipDeviceAttributeComputeCapabilityMinor, i);
+        gcn = 10*cc.x+cc.y;
+        p_device[n_valided] = device;
+        p_arch[n_valided]   = gcn;
+        ++n_valided;
+    }
+    return n_valided;
+}
+__local_func int cuda_platform_init( cuda_platform_t* p_platform )
+{
+    int i;
+    p_platform->n_devices=__get_devices( &p_platform->devices[0], &p_platform->arch[0] );
+    if(p_platform->n_devices<=0) return idc_error_invalid_device;
+    for( i=0; i<p_platform->n_devices; ++i ){
+        hipDeviceGetAttribute(&p_platform->nSM[i], hipDeviceAttributeMultiprocessorCount, i);
+    }
+    return idc_success;
+}
+#else
 static int __get_devices( CUdevice* const p_device, int* const p_arch )
-{   
+{
     struct{ int x, y; } cc;
     CUdevice device;
     int i, n_devices, sm, n_valided;    
+
     cuDeviceGetCount( &n_devices );
+
     if( n_devices<=0 ) return -1;
     for( i=0, n_valided=0; i<n_devices; ++i ){
         cuDeviceGet( &device, i );
@@ -31,3 +64,4 @@ __local_func int cuda_platform_init( cuda_platform_t* p_platform )
     }
     return idc_success;
 }
+#endif

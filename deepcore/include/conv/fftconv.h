@@ -23,7 +23,13 @@ __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t*, const cuda_cont
 __local_func size_t idc_cellconv_createOp( idc_fftconvOp_t*, const cuda_context_t*, uint32_t, int, int, int, int, int, int, int, int, int, int, int, int, int, int );
 __local_func size_t idc_cellconv_createOp_grad( idc_fftconvOp_t*, const cuda_context_t*, int, int, int, int, int, int, int, int, int, int, int, int, int );
 
+#ifdef __HIPCC__
+__local_func void   idc_fftconv( idc_fftconvOp_t*, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, float, hipStream_t );
+__local_func void   idc_fftconv_grad( idc_fftconvOp_t*, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, hipDeviceptr_t, float, hipStream_t );
+
+#else
 __local_func void   idc_fftconv( idc_fftconvOp_t*, CUdeviceptr, CUdeviceptr, CUdeviceptr, CUdeviceptr, CUdeviceptr, float, CUstream );
 __local_func void   idc_fftconv_grad( idc_fftconvOp_t*, CUdeviceptr, CUdeviceptr, CUdeviceptr, CUdeviceptr, float, CUstream );
+#endif
 
 #endif

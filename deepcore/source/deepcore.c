@@ -4,7 +4,11 @@
 #include"../include/cuda/cuda_platform.h"
 #include"../include/conv/fftconv.h"
 #include"../include/blas/gemm.h"
+#ifdef __HIPCC__
+#define as_devptr(p) (hipDeviceptr_t)((uintptr_t)(p))
+#else
 #define as_devptr(p) (CUdeviceptr)((uintptr_t)(p))
+#endif
 
 static cuda_platform_t* g_pPlat=NULL;
 static cuda_context_t * g_pCtx =NULL;
@@ -28,6 +32,9 @@ DEEPCOREAPIENTRY dc_status_t dc_init()
         return dc_error_out_of_memory;
     }
     for( i=0; (i<g_pPlat->n_devices)&(status==dc_success); ++i ){
+#ifdef __HIPCC__
+        g_pCtx[i].dev_id = i;
+#endif
         g_pCtx[i].arch=g_pPlat->arch[i];
 #ifdef DC_VERBOSE
         printf("dc dev:%d, arch:%d\n", i, g_pCtx[i].arch);
@@ -75,7 +82,11 @@ DEEPCOREAPIENTRY dc_tensorshape_t dc_create_tensor_shape_linear( size_t nb )
 }
 DEEPCOREAPIENTRY dc_status_t dc_create_tensor( void** p_devptr, dc_tensorshape_t shape )
 {
+#ifdef __HIPCC__
+    void * devptr;
+#else
     CUdeviceptr devptr;
+#endif
     uint32_t tt, prc, nx, ny, bt, nc, size, pitch, ext, enb;
     tt=((uint32_t)(shape>>56))&0x3f;
     prc=((uint32_t)(shape>>62))&0x3;
@@ -108,44 +119,71 @@ DEEPCOREAPIENTRY dc_status_t dc_create_tensor( void** p_devptr, dc_tensorshape_t
         size=(uint32_t)(shape);
     }
     enb=prc==0?4:2;
+#ifdef __HIPCC__
+    if(hipMalloc( &devptr, size*enb )!=hipSuccess)
+        return dc_error_out_of_device_memory;
+#else
     if(cuMemAlloc( &devptr, size*enb )!=CUDA_SUCCESS)
         return dc_error_out_of_device_memory;
+#endif
     *p_devptr=(void*)devptr;
     return dc_success;
 }
 DEEPCOREAPIENTRY dc_status_t dc_release_tensor( void* p_devptr )
 {
+#ifdef __HIPCC__
+    if(p_devptr!=0){ hipFree(p_devptr); }
+#else
     if(p_devptr!=0){ cuMemFree(as_devptr(p_devptr)); }
+#endif
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_zero( void* p, dc_tensorshape_t shape, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_zero( void* p, dc_tensorshape_t shape, dc_stream_t s )
 {
-    CUDA_MEMCPY2D mem2d;
+    //CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape;
     idc_get_tensor_shape( &ishape, shape );
+#ifdef __HIPCC__
+    hipMemsetAsync(p, 0, ishape.ldx*ishape.diy,s);
+#else
     if(ishape.diy>1){
         cuMemsetD2D8Async( as_devptr(p), ishape.ldx, 0, ishape.dix, ishape.diy, s );
     } else {
         cuMemsetD8Async( as_devptr(p), 0, ishape.dix, s );
     }
+#endif
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_subzero( void* p, dc_tensorshape_t shape, size_t xnb, size_t y, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_subzero( void* p, dc_tensorshape_t shape, size_t xnb, size_t y, dc_stream_t s )
 {
-    CUDA_MEMCPY2D mem2d;
+    //CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape;
     idc_get_tensor_shape( &ishape, shape );
     if((xnb>ishape.dix)||(y>ishape.diy)) 
         return dc_error_invalid_value;
+#ifdef __HIPCC__
+    hipMemsetAsync(p, 0, ishape.ldx*y, s);
+#else
     if(y>1){
         cuMemsetD2D8Async( as_devptr(p), ishape.ldx, 0, xnb, y, s );
     } else {
         cuMemsetD8Async( as_devptr(p), 0, xnb, s );
     }
+#endif
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_copy( void* p_dst, dc_tensorshape_t shape_dst, const void* p_src, dc_tensorshape_t shape_src, size_t xnb, size_t diy, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_copy( void* p_dst, dc_tensorshape_t shape_dst, const void* p_src, dc_tensorshape_t shape_src, size_t xnb, size_t diy, dc_stream_t s )
 {
+#ifdef __HIPCC__
+    idc_tensor_shape_t ishape_dst, ishape_src;
+    idc_get_tensor_shape( &ishape_dst, shape_dst );
+    idc_get_tensor_shape( &ishape_src, shape_src );
+    if((ishape_src.dix<xnb)|(ishape_dst.dix<xnb)|(ishape_src.diy<diy)|(ishape_dst.diy<diy))
+        return dc_error_out_of_range;
+    
+    hipMemcpy2DAsync(p_dst, ishape_dst.ldx, p_src, ishape_src.ldx, xnb, diy,hipMemcpyDeviceToDevice, s);
+    return dc_success;
+#else
     CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape_dst, ishape_src;
     idc_get_tensor_shape( &ishape_dst, shape_dst );
@@ -166,9 +204,20 @@ DEEPCOREAPIENTRY dc_status_t dc_tensor_copy( void* p_dst, dc_tensorshape_t shape
     mem2d.Height       =diy;
     cuMemcpy2DAsync( &mem2d, s );
     return dc_success;
+#endif
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_subcopy( void* p_dst, dc_tensorshape_t shape_dst, const void* p_src, dc_tensorshape_t shape_src, size_t xnb, size_t diy, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_subcopy( void* p_dst, dc_tensorshape_t shape_dst, const void* p_src, dc_tensorshape_t shape_src, size_t xnb, size_t diy, dc_stream_t s )
 {
+#ifdef __HIPCC__
+    idc_tensor_shape_t ishape_dst, ishape_src;
+    idc_get_tensor_shape( &ishape_dst, shape_dst );
+    idc_get_tensor_shape( &ishape_src, shape_src );
+    if((ishape_src.dix<xnb)|(ishape_dst.dix<xnb)|(ishape_src.diy<diy)|(ishape_dst.diy<diy))
+        return dc_error_out_of_range;
+    
+    hipMemcpy2DAsync(p_dst, ishape_dst.ldx, p_src, ishape_src.ldx, xnb, diy,hipMemcpyDeviceToDevice, s);
+    return dc_success;
+#else
     CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape_dst, ishape_src;
     idc_get_tensor_shape( &ishape_dst, shape_dst );
@@ -189,9 +238,18 @@ DEEPCOREAPIENTRY dc_status_t dc_tensor_subcopy( void* p_dst, dc_tensorshape_t sh
     mem2d.Height       =diy;
     cuMemcpy2DAsync( &mem2d, s );
     return dc_success;
+#endif
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_store( void* p_dst, dc_tensorshape_t shape, const void* p_src, size_t src_pitch, size_t xnb, size_t diy, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_store( void* p_dst, dc_tensorshape_t shape, const void* p_src, size_t src_pitch, size_t xnb, size_t diy, dc_stream_t s )
 {
+#ifdef __HIPCC__
+    idc_tensor_shape_t ishape;
+    idc_get_tensor_shape( &ishape, shape );
+    if((ishape.dix<xnb)|(ishape.diy<diy))
+        return dc_error_out_of_range;
+    hipMemcpy2DAsync(p_dst, ishape.ldx, p_src, src_pitch, xnb, diy,hipMemcpyHostToDevice, s);
+    return dc_success;
+#else
     CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape;
     idc_get_tensor_shape( &ishape, shape );
@@ -211,9 +269,18 @@ DEEPCOREAPIENTRY dc_status_t dc_tensor_store( void* p_dst, dc_tensorshape_t shap
     mem2d.Height       =diy;
     cuMemcpy2DAsync( &mem2d, s );
     return dc_success;
+#endif
 }
-DEEPCOREAPIENTRY dc_status_t dc_tensor_load( void* p_dst, size_t dst_pitch, const void* p_src, dc_tensorshape_t shape, size_t xnb, size_t diy, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_tensor_load( void* p_dst, size_t dst_pitch, const void* p_src, dc_tensorshape_t shape, size_t xnb, size_t diy, dc_stream_t s )
 {
+#ifdef __HIPCC__
+    idc_tensor_shape_t ishape;
+    idc_get_tensor_shape( &ishape, shape );
+    if((ishape.dix<xnb)|(ishape.diy<diy))
+        return dc_error_out_of_range;
+    hipMemcpy2DAsync(p_dst, dst_pitch, p_src, ishape.ldx, xnb, diy,hipMemcpyDeviceToHost, s);
+    return dc_success;
+#else
     CUDA_MEMCPY2D mem2d;
     idc_tensor_shape_t ishape;
     idc_get_tensor_shape( &ishape, shape );
@@ -233,6 +300,7 @@ DEEPCOREAPIENTRY dc_status_t dc_tensor_load( void* p_dst, size_t dst_pitch, cons
     mem2d.Height       =diy;
     cuMemcpy2DAsync( &mem2d, s );
     return dc_success;
+#endif
 }
 DEEPCOREAPIENTRY dc_status_t dc_create_fftconvOp( dc_fftconvOp* Op, size_t* p_auxsize, uint32_t mask, int ng, dc_tensorshape_t pshape, dc_tensorshape_t fshape, dc_tensorshape_t qshape, uint32_t pad )
 {
@@ -355,41 +423,45 @@ DEEPCOREAPIENTRY dc_status_t dc_create_gemmOp_grad( dc_gemmOp* Op, uint32_t mask
     idc_gemm_createOp_grad( (idc_gemmOp_t*)(*Op), &g_pCtx[idev], (param.prc<<1)|mask, ng, param.pnc/ng, n, param.qnc/ng, param.ldp<<s, param.ldq<<s, param.ldf<<s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_fftconv( dc_fftconvOp Op, void* d_aux, void* d_dst, const void* d_src, const void* d_filter, const void* d_x, float alpha, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_fftconv( dc_fftconvOp Op, void* d_aux, void* d_dst, const void* d_src, const void* d_filter, const void* d_x, float alpha, dc_stream_t s )
 {
     idc_fftconv( (idc_fftconvOp_t*)Op, as_devptr(d_aux), as_devptr(d_dst), as_devptr(d_src), as_devptr(d_filter), as_devptr(d_x), alpha, s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_fftconv_grad( dc_fftconvOp Op, void* d_aux, void* d_grad, const void* d_p, const void* d_q, float scale, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_fftconv_grad( dc_fftconvOp Op, void* d_aux, void* d_grad, const void* d_p, const void* d_q, float scale, dc_stream_t s )
 {
     idc_fftconv_grad( (idc_fftconvOp_t*)Op, as_devptr(d_aux), as_devptr(d_grad), as_devptr(d_p), as_devptr(d_q), scale, s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_cellconv( dc_cellconvOp Op, void* d_aux, void* d_dst, const void* d_src, const void* d_filter, const void* d_x, float alpha, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_cellconv( dc_cellconvOp Op, void* d_aux, void* d_dst, const void* d_src, const void* d_filter, const void* d_x, float alpha, dc_stream_t s )
 {
     idc_fftconv( (idc_fftconvOp_t*)Op, as_devptr(d_aux), as_devptr(d_dst), as_devptr(d_src), as_devptr(d_filter), as_devptr(d_x), alpha, s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_cellconv_grad( dc_cellconvOp Op, void* d_aux, void* d_grad, const void* d_p, const void* d_q, float scale, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_cellconv_grad( dc_cellconvOp Op, void* d_aux, void* d_grad, const void* d_p, const void* d_q, float scale, dc_stream_t s )
 {
     idc_fftconv_grad( (idc_fftconvOp_t*)Op, as_devptr(d_aux), as_devptr(d_grad), as_devptr(d_p), as_devptr(d_q), scale, s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_gemm( dc_gemmOp Op, void* d_c, const void* d_a, const void* d_b, const void* d_x, float alpha, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_gemm( dc_gemmOp Op, void* d_c, const void* d_a, const void* d_b, const void* d_x, float alpha, dc_stream_t s )
 {
     idc_gemm( (idc_gemmOp_t*)Op, as_devptr(d_c), as_devptr(d_a), as_devptr(d_b), as_devptr(d_x), alpha, s );
     return dc_success;
 }
-DEEPCOREAPIENTRY dc_status_t dc_gemm_grad( dc_gemmOp Op, void* d_c, const void* d_a, const void* d_b, float scale, CUstream s )
+DEEPCOREAPIENTRY dc_status_t dc_gemm_grad( dc_gemmOp Op, void* d_c, const void* d_a, const void* d_b, float scale, dc_stream_t s )
 {
     idc_gemmOp_t* iOp=(idc_gemmOp_t*)Op;
     uint32_t ldx=iOp->ldx;
     uint32_t dix=iOp->dix;
     uint32_t diy=iOp->diy;
     uint32_t align=8<<(diy>>16);
+#ifdef __HIPCC__
+    return dc_error_unsupported;    // unimplemented
+#else
     if((dix&(align-1))!=0){
         cuMemsetD2D8Async( as_devptr(d_a)+dix, ldx, 0, IDC_AFFIS(dix,align)-dix, (diy&0xffff)+1, s );
     }
+#endif
     idc_gemm_grad( iOp, as_devptr(d_c), as_devptr(d_a), as_devptr(d_b), scale, s );
     return dc_success;
 }
