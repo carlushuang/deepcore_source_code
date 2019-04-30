@@ -31,15 +31,15 @@ int main()
 	//tensor_shape_t shapes[]={{27,5,64,192,512,2} , {13,3,192,384,512,1}, {13,3,384,384,512,1}, {13,3,384,256,512,1}};
 	tensor_shape_t shapes[]={
 		{13,3,384,384,512,1},{27,3,384,384,512,1},{55,3,384,384,256,1},{96,3,384,384,64,1},
-		{13,5,384,384,512,2},{27,5,384,384,512,2},{55,5,384,384,256,2},{96,5,384,384,64,2},
-		{13,7,384,384,128,3},{27,7,384,384,128,3},{55,7,384,384,128,3},{96,7,384,384,64,3}};
+		{13,5,384,192,512,2},{27,5,384,192,512,2},{55,5,384,192,256,2},{96,5,384,192,64,2},
+		{13,7,384,192,256,3},{27,7,384,192,256,3},{55,7,384,192,128,3},{96,7,384,192,64,3}};
 
 	for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++  )
 	{
 		int dir=0;
 		for(  dir=0; dir<1; ++dir )
 		{
-			printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
+			//printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
 			int pn=shapes[e].ds;
 			int fn=shapes[e].fs;
 			int pad = shapes[e].pad;
@@ -52,7 +52,8 @@ int main()
 			int in=dir==0?pn:qn;
 			int on=dir==0?qn:pn;
 			//int pad=dir==0?0:(fn-1);
-			printf(AP"  input(cnhw):%dx%dx%dx%d, filter(kcrs):%dx%dx%dx%d, output(cnhw):%dx%dx%dx%d, pad:%d\n",
+			//printf(AP"input(cnhw):%dx%dx%dx%d, filter(kcrs):%dx%dx%dx%d, output(cnhw):%dx%dx%dx%d, pad:%d, ",
+			printf(AP"input:%dx%dx%dx%d, filter:%dx%dx%dx%d, output:%dx%dx%dx%d, pad:%d, ",
 				pnc,bat,pn,pn,    qnc,pnc,fn,fn,    qnc,bat,qn,qn,   pad);
 			
 			uint64_t qshape=dc_create_tensor_shape( dcMaskPrecisionFloat, (qn<<16)|qn, (qnc<<16)|bat );
@@ -83,7 +84,8 @@ int main()
 #endif
 			char auxnb_str[20];
 			b2s(auxnb, auxnb_str);
-			printf(AP"  aux buffer size:%llu(%s)\n", auxnb, auxnb_str);
+			//printf("aux:%llu(%s), ", auxnb, auxnb_str);
+			printf("aux:%s, ", auxnb_str);
 
 			float* a=new float[bat*inc*in*in];
 			float* b=new float[qnc*pnc*fn*fn];
@@ -160,7 +162,7 @@ int main()
 			cuCtxSynchronize();
 			cuEventElapsedTime(&elapsed_ms, evt_0, evt_1);
 #endif
-			printf( AP"examples[%d][%d] cost:%f ms, ", dir, e ,elapsed_ms/LOOP);
+			printf("cost:%fms, ", elapsed_ms/LOOP);
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );
 #ifdef __HIPCC__
@@ -170,7 +172,7 @@ int main()
 #endif
 
 			is_ok=check( c, d, bat*onc*on*on );
-			printf("compute %s\n",is_ok?"ok":"fail");
+			printf("%s\n",is_ok?"ok":"fail");
 
 		__LAB0:
 #ifdef __HIPCC__
