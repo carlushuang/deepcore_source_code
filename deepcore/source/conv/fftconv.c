@@ -111,8 +111,8 @@ __local_func size_t idc_fftconv_createOp( idc_fftconvOp_t* Op, const cuda_contex
     idc_flatcgemm_create_kernel( &Op->kcgemm, p_ctx, n, npc, pnc, qnc, dir );
     cuda_kernel_sep_f32( &Op->kcgemm, 3, (float)(1.0/(fft_size*fft_size)) );
     n<<=3;
-    Op->divpt[0]=n*npc*inc;
-    Op->divpt[1]=n*pnc*qnc;
+    Op->divpt[0]=(size_t)n*npc*inc;
+    Op->divpt[1]=(size_t)n*pnc*qnc;
     return (Op->divpt[0]+Op->divpt[1]+n*npc*onc);
 }
 __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_context_t* p_ctx, int prc, int ng, int pnx, int pny, int pnc, int ldp, int fnx, int fny, int qnx, int qny, int qnc, int ldq, int bat )

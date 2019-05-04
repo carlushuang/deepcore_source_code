@@ -115,8 +115,8 @@ __local_func size_t idc_cellconv_createOp( idc_fftconvOp_t* Op, const cuda_conte
         idc_cgemv_create_kernel( p_kernel, p_ctx, n, inc, onc, lda, ldb, ldb );
     }
     cuda_kernel_sep_f32( p_kernel, 3, (float)(1.0/(cell_size*cell_size)) );
-    Op->divpt[0]=n*(npc>1?inc:1)*lda;
-    Op->divpt[1]=n*inc*ldb;
+    Op->divpt[0]=(size_t)n*(npc>1?inc:1)*lda;
+    Op->divpt[1]=(size_t)n*inc*ldb;
     return (Op->divpt[0]+Op->divpt[1]+n*(npc>1?(onc*lda):ldb));
 }
 __local_func size_t idc_cellconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_context_t* p_ctx, int prc, int ng, int pnx, int pny, int pnc, int ldp, int fnx, int fny, int qnx, int qny, int qnc, int ldq, int bat )

@@ -51,10 +51,18 @@ static int get_max_batch(int w){
     return 512;
 }
 int get_next_shape(tensor_shape_t * shape){
+#if 1
 	static int range_x[]={3,5,7};
 	static int range_w[]={14,27,32,55,64,72,96,128,192};
 	static int range_c[]={64,128,192,256,384};
 	static int range_k[]={128,256,384};
+#endif
+#if 0
+	static int range_x[]={5};
+	static int range_w[]={64};
+	static int range_c[]={256};
+	static int range_k[]={384};
+#endif
 	static int have_next = 1;
 	static int xi=0;
 	static int wi=0;
@@ -187,8 +195,8 @@ int main()
 #endif
 			char auxnb_str[20];
 			b2s(auxnb, auxnb_str);
-			//printf("aux:%llu(%s), ", auxnb, auxnb_str);
 			printf("aux:%s, ", auxnb_str);
+			//printf("aux:%llu(%s), ", auxnb, auxnb_str);
 
 			float* a=new float[bat*inc*in*in];
 			float* b=new float[qnc*pnc*fn*fn];
