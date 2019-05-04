@@ -7,6 +7,8 @@
 //#pragma comment( lib, "../deepcore/deepcore.lib" )
 //#pragma comment( lib, "cuda.lib" )
 
+#define EF_PRT
+
 #define DC_CALL(call) 							\
 	do{											\
 		dc_status_t dc_stat=call;				\
@@ -135,6 +137,10 @@ int main()
 #endif
 	tensor_shape_t shape;
 
+#ifdef EF_PRT
+	printf("N\tC\tH\tW\tK\tR\tS\tP\tQ\tmem\tcost(ms)\n");
+#endif
+
 	//for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++ )
 	while(get_next_shape(&shape))
 	{
@@ -162,11 +168,16 @@ int main()
 			int onc=dir==0?qnc:pnc;
 			int in=dir==0?pn:qn;
 			int on=dir==0?qn:pn;
+#ifndef EF_PRT
 			//int pad=dir==0?0:(fn-1);
 			//printf(AP"input(cnhw):%dx%dx%dx%d, filter(kcrs):%dx%dx%dx%d, output(cnhw):%dx%dx%dx%d, pad:%d, ",
 			printf(AP"input:%dx%dx%dx%d, filter:%dx%dx%dx%d, output:%dx%dx%dx%d, pad:%d, ",
 				pnc,bat,pn,pn,    qnc,pnc,fn,fn,    qnc,bat,qn,qn,   pad);
-			
+#else
+			printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+				bat,pnc,pn,pn, qnc,fn,fn, pad,pad);
+#endif
+
 			uint64_t qshape=dc_create_tensor_shape( dcMaskPrecisionFloat, (qn<<16)|qn, (qnc<<16)|bat );
 			uint64_t pshape=dc_create_tensor_shape( dcMaskPrecisionFloat, (pn<<16)|pn, (pnc<<16)|bat );
 			uint64_t kshape=dc_create_tensor_shape_filter( dcMaskPrecisionFloat, (fn<<16)|fn, (qnc<<16)|pnc );
@@ -195,7 +206,11 @@ int main()
 #endif
 			char auxnb_str[20];
 			b2s(auxnb, auxnb_str);
+#ifndef EF_PRT
 			printf("aux:%s, ", auxnb_str);
+#else
+			printf("\t%s",auxnb_str);
+#endif
 			//printf("aux:%llu(%s), ", auxnb, auxnb_str);
 
 			float* a=new float[bat*inc*in*in];
@@ -273,7 +288,11 @@ int main()
 			cuCtxSynchronize();
 			cuEventElapsedTime(&elapsed_ms, evt_0, evt_1);
 #endif
+#ifndef EF_PRT
 			printf("cost:%fms, ", elapsed_ms/LOOP);
+#else
+			printf("\t%f\n", elapsed_ms/LOOP);
+#endif
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );
 #ifdef __HIPCC__
@@ -283,7 +302,9 @@ int main()
 #endif
 
 			is_ok=check( c, d, bat*onc*on*on );
+#ifndef EF_PRT
 			printf("%s\n",is_ok?"ok":"fail");
+#endif
 
 		__LAB0:
 #ifdef __HIPCC__

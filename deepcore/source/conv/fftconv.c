@@ -113,7 +113,7 @@ __local_func size_t idc_fftconv_createOp( idc_fftconvOp_t* Op, const cuda_contex
     n<<=3;
     Op->divpt[0]=(size_t)n*npc*inc;
     Op->divpt[1]=(size_t)n*pnc*qnc;
-    return (Op->divpt[0]+Op->divpt[1]+n*npc*onc);
+    return (Op->divpt[0]+Op->divpt[1]+(size_t)n*npc*onc);
 }
 __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_context_t* p_ctx, int prc, int ng, int pnx, int pny, int pnc, int ldp, int fnx, int fny, int qnx, int qny, int qnc, int ldq, int bat )
 {
@@ -197,9 +197,9 @@ __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_c
     idc_flatcgevv_create_kernel( &Op->kcgemm, p_ctx, n, npc, pnc, qnc );
     cuda_kernel_sep_f32( &Op->kcgemm, 3, (float)(1.0/(bat*fft_size*fft_size)) );
     n<<=3;
-    Op->divpt[0]=n*npc*pnc;
-    Op->divpt[1]=n*npc*qnc;
-    return (Op->divpt[0]+Op->divpt[1]+n*pnc*qnc);
+    Op->divpt[0]=(size_t)n*npc*pnc;
+    Op->divpt[1]=(size_t)n*npc*qnc;
+    return (Op->divpt[0]+Op->divpt[1]+(size_t)n*pnc*qnc);
 }
 #ifdef __HIPCC__
 __local_func void idc_fftconv( idc_fftconvOp_t* Op, hipDeviceptr_t d_aux, hipDeviceptr_t d_target, hipDeviceptr_t d_source, hipDeviceptr_t d_filter, hipDeviceptr_t d_x, float alpha, hipStream_t s )
