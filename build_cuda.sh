@@ -54,6 +54,8 @@ SRC=fftconv.cpp
 TARGET=fftconv
 pushd $WD
 
+rm -rf $BUILD_DIR/$TARGET
+
 $CXX $CXXFLAGS $SRC $LDFLAGS -o $BUILD_DIR/$TARGET
 
 popd

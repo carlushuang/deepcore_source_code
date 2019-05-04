@@ -3,6 +3,7 @@
 #include<math.h>
 #include"common.h"
 #include"deepcore.h"
+#include <unistd.h>
 //#pragma comment( lib, "../deepcore/deepcore.lib" )
 //#pragma comment( lib, "cuda.lib" )
 
@@ -19,6 +20,95 @@
 #define AP "[fftconv]"
 #define WARMUP 3
 #define LOOP 8
+#define ALEN(arr) (sizeof(arr)/sizeof(arr[0]))
+
+static int need_continue(int w,int c,int k){
+    if(k<c)
+        return 1;
+    return 0;
+}
+static int get_pad(int x){
+    if (x == 3)
+        return 1;
+    if (x == 5)
+        return 2;
+    if (x == 7)
+        return 3;
+    return 0;
+}
+
+static int get_max_batch(int w){
+    if (w>=192)
+        return 16;
+    if (w>=128)
+        return 32;
+    if (w>=96)
+        return 64;
+    if (w>=72)
+        return 128;
+    if (w>=55)
+        return 256;
+    return 512;
+}
+int get_next_shape(tensor_shape_t * shape){
+	static int range_x[]={3,5,7};
+	static int range_w[]={14,27,32,55,64,72,96,128,192};
+	static int range_c[]={64,128,192,256,384};
+	static int range_k[]={128,256,384};
+	static int have_next = 1;
+	static int xi=0;
+	static int wi=0;
+	static int ci=0;
+	static int ki=0;
+
+	int goto_next=0;
+	int x,w,c,k,pad,b;
+
+LABEL_0:
+	goto_next = 0;
+	if(!have_next)
+		return 0;
+
+	x=range_x[xi];
+	w=range_w[wi];
+	c=range_c[ci];
+	k=range_k[ki];
+
+	if(need_continue(w,c,k)){
+		goto_next = 1;
+		goto LABEL_1;
+	}
+	pad=get_pad(x);
+	b = get_max_batch(w);
+
+	shape->ds = w;
+	shape->fs = x;
+	shape->pnc = c;
+	shape->qnc = k;
+	shape->bat = b;
+	shape->pad = pad;
+
+LABEL_1:
+	ki++;
+	if(ki>=ALEN(range_k)){
+		ki=0;
+		ci++;
+		if(ci>=ALEN(range_c)){
+			ci=0;
+			wi++;
+			if(wi>=ALEN(range_w)){
+				wi=0;
+				xi++;
+				if(xi>=ALEN(range_x)){
+					have_next=0;
+				}
+			}
+		}
+	}
+	if(goto_next)
+		goto LABEL_0;
+	return 1;
+}
 
 int main()
 {
@@ -29,24 +119,37 @@ int main()
 
 	//tensor_shape_t shapes[]={{48,3,32,64,8},{40,3,32,64,1},{24,3,32,64,32},{18,3,32,32,1},{10,3,32,32,32}};
 	//tensor_shape_t shapes[]={{27,5,64,192,512,2} , {13,3,192,384,512,1}, {13,3,384,384,512,1}, {13,3,384,256,512,1}};
+#if 0
 	tensor_shape_t shapes[]={
 		{13,3,384,384,512,1},{27,3,384,384,512,1},{55,3,384,384,256,1},{96,3,384,384,64,1},
 		{13,5,384,192,512,2},{27,5,384,192,512,2},{55,5,384,192,256,2},{96,5,384,192,64,2},
 		{13,7,384,192,256,3},{27,7,384,192,256,3},{55,7,384,192,128,3},{96,7,384,192,64,3}};
+#endif
+	tensor_shape_t shape;
 
-	for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++  )
+	//for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++ )
+	while(get_next_shape(&shape))
 	{
 		int dir=0;
 		for(  dir=0; dir<1; ++dir )
 		{
 			//printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
+#if 0
 			int pn=shapes[e].ds;
 			int fn=shapes[e].fs;
 			int pad = shapes[e].pad;
-			int qn=pn+2*pad-fn+1;
 			int pnc=shapes[e].pnc;
 			int qnc=shapes[e].qnc;
 			int bat=shapes[e].bat;
+#endif
+			int pn=shape.ds;
+			int fn=shape.fs;
+			int pad = shape.pad;
+			int pnc=shape.pnc;
+			int qnc=shape.qnc;
+			int bat=shape.bat;
+
+			int qn=pn+2*pad-fn+1;
 			int inc=dir==0?pnc:qnc;
 			int onc=dir==0?qnc:pnc;
 			int in=dir==0?pn:qn;
@@ -193,6 +296,8 @@ int main()
 			delete[] c;
 			delete[] d;
 			//if(!is_ok) break;
+#define SLEEP_USEC  50000
+			usleep(SLEEP_USEC);
 		}
 	}
 	dc_exit();
