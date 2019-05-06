@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_r2c_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144+73];
@@ -30,7 +30,7 @@ __global__ void dk_sfft16x16_r2c_s3( float2* d_c, const float* __restrict__ d_r,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144];
@@ -65,7 +65,7 @@ __global__ void dk_sfft16x16_r2c_s5( float2* d_c, const float* __restrict__ d_r,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144];
@@ -104,7 +104,7 @@ __global__ void dk_sfft16x16_r2c_s7( float2* d_c, const float* __restrict__ d_r,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_flip_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_flip_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144];
@@ -135,7 +135,7 @@ __global__ void dk_sfft16x16_r2c_flip_s3( float2* d_c, const float* __restrict__
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_flip_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_flip_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144];
@@ -170,7 +170,7 @@ __global__ void dk_sfft16x16_r2c_flip_s5( float2* d_c, const float* __restrict__
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_flip_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_flip_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,4,2,6,1,5,3,7};
     __shared__ float smem[8*144];

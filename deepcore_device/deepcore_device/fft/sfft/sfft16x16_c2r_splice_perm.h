@@ -1,5 +1,5 @@
 #define sfft16x16_c2r_splice_perm(dir,suffix)        \
-__global__ void dk_sfft16x16_c2r_splice_perm##suffix(\
+__global__ void LB_16x16_256 dk_sfft16x16_c2r_splice_perm##suffix(\
           float *              d_r   ,  \
     const float2* __restrict__ d_c   ,  \
     const float * __restrict__ d_RF  ,  \

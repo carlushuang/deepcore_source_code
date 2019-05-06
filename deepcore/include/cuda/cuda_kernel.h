@@ -21,12 +21,14 @@
         }                       \
     }while(0)
 #endif
+#define KER_NAME_LEN 48
 typedef struct cuda_kernel{
 #ifdef __HIPCC__
     hipFunction_t id;
 #else
     CUfunction id;
 #endif
+    char       kernel_name[KER_NAME_LEN];
     uint32_t   gdx;
     uint32_t   gdy;
     uint32_t   gdz;
@@ -101,12 +103,18 @@ INLINE void cuda_kernel_sep_f32( cuda_kernel_t* p_kernel, int i, float p )
 #ifdef __HIPCC__
 INLINE void cuda_kernel_launch( cuda_kernel_t* p, hipStream_t s )
 {
-    hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    hipError_t rtn = hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    if(rtn != hipSuccess){
+        printf("fail to get kernel %s, err:%d\n",p_name,(int)rtn);
+    }
 }
 #else
 INLINE void cuda_kernel_launch( cuda_kernel_t* p, CUstream s )
 {
-    cuLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    CUresult rtn = cuLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    if(rtn != CUDA_SUCCESS){
+        printf("fail to launch kernel\n");
+    }
 }
 #endif
 

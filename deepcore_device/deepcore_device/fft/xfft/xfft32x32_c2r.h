@@ -1,5 +1,5 @@
 #define xfft32x32_c2r(dir,suffix)       \
-__global__ void LB_32x32_256\
+__global__ void LB_32x32_256 \
 dk_xfft32x32_c2r##suffix(               \
           __half*              d_r  ,   \
     const float2* __restrict__ d_c  ,   \

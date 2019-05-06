@@ -1,5 +1,5 @@
 
-__global__ void dk_sfft16x16_r2c( float2* d_c, 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, int n, int n_cells )
 {
@@ -30,7 +30,7 @@ __global__ void dk_sfft16x16_r2c( float2* d_c,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_ext( float2* d_c, 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_ext( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, int n, int n_cells )
 {
@@ -62,7 +62,7 @@ __global__ void dk_sfft16x16_r2c_ext( float2* d_c,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_pad( float2* d_c, 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_pad( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, int n, int n_cells, int pad_x, int pad_y )
 {
@@ -96,7 +96,7 @@ __global__ void dk_sfft16x16_r2c_pad( float2* d_c,
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_flip( float2* d_c, 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_flip( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, int n, int n_cells )
 {

@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_r2c_split( 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_split( 
           float2*              d_c, 
     const float * __restrict__ d_r, 
     const float * __restrict__ d_RF, 
@@ -50,7 +50,7 @@ __global__ void dk_sfft16x16_r2c_split(
 #pragma unroll
     for( int i=0; i<9; ++i ){ d_c[i*16]=c[i]; }
 }
-__global__ void dk_sfft16x16_r2c_split_pad( 
+__global__ void LB_16x16_128 dk_sfft16x16_r2c_split_pad( 
     float2* d_c, 
     const float* __restrict__ d_r, 
     const float* __restrict__ d_RF, 

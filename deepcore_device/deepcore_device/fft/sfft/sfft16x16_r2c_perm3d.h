@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_r2c_perm3d( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm3d( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, int n_cells, int dir )
 {
@@ -34,7 +34,7 @@ __global__ void dk_sfft16x16_r2c_perm3d( float2* d_c,
     s_hfft16( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm3d_ext( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm3d_ext( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, int n_cells, int dir )
 {
@@ -71,7 +71,7 @@ __global__ void dk_sfft16x16_r2c_perm3d_ext( float2* d_c,
     s_hfft16( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm3d_pad( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm3d_pad( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, int n_cells, int pad_x, int pad_y )
 {
@@ -107,7 +107,7 @@ __global__ void dk_sfft16x16_r2c_perm3d_pad( float2* d_c,
     s_hfft16( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm3d_flip( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm3d_flip( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, int n_cells, int dir )
 {

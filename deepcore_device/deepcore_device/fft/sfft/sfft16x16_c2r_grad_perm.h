@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_c2r_grad_perm( float* d_r, 
+__global__ void LB_16x16_256 dk_sfft16x16_c2r_grad_perm( float* d_r, 
     const float2* __restrict__ d_c, const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc, unsigned int nx, unsigned int ny )
 {   
@@ -28,7 +28,7 @@ __global__ void dk_sfft16x16_c2r_grad_perm( float* d_r,
         }
     }
 }
-__global__ void dk_sfft16x16_c2r_grad_perm_s3( float* d_r, 
+__global__ void LB_16x16_256 dk_sfft16x16_c2r_grad_perm_s3( float* d_r, 
     const float2* __restrict__ d_c, const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc )
 {   
@@ -57,7 +57,7 @@ __global__ void dk_sfft16x16_c2r_grad_perm_s3( float* d_r,
     } __syncthreads();
     if(tid<144){ d_r[0]=scale*smem[tid]; }
 }
-__global__ void dk_sfft16x16_c2r_grad_perm_s5( float* d_r, 
+__global__ void LB_16x16_256 dk_sfft16x16_c2r_grad_perm_s5( float* d_r, 
     const float2* __restrict__ d_c, const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc )
 {   

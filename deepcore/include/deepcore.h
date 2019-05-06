@@ -101,6 +101,8 @@ DEEPCOREAPIENTRY dc_status_t      dc_destroy_cellconvOp( dc_cellconvOp );
 DEEPCOREAPIENTRY dc_status_t      dc_destroy_gemmOp( dc_gemmOp );
 DEEPCOREAPIENTRY dc_status_t      dc_exit();
 
+DEEPCOREAPIENTRY dc_status_t      dc_get_fftconv_kernel_name(dc_fftconvOp,char*,char*,char*,char*);
+
 #ifdef __cplusplus
 }
 #endif

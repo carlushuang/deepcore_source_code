@@ -138,7 +138,11 @@ int main()
 	tensor_shape_t shape;
 
 #ifdef EF_PRT
-	printf("N\tC\tH\tW\tK\tR\tS\tP\tQ\tmem\tcost(ms)\n");
+	char kn_fft_data[48];
+	char kn_fft_filter[48];
+	char kn_cgemm[48];
+	char kn_ifft[48];
+	printf("N    C    H    W    K    R  S  P Q   time(ms)  mem     fft_data      fft_filter       cgemm       ifft\n");
 #endif
 
 	//for( int e=0; e<sizeof(shapes)/sizeof(shapes[0]); e++ )
@@ -174,7 +178,7 @@ int main()
 			printf(AP"input:%dx%dx%dx%d, filter:%dx%dx%dx%d, output:%dx%dx%dx%d, pad:%d, ",
 				pnc,bat,pn,pn,    qnc,pnc,fn,fn,    qnc,bat,qn,qn,   pad);
 #else
-			printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d",
+			printf("%-4d %-4d %-4d %-4d ""%-4d %-2d %-2d %-1d %-1d ",
 				bat,pnc,pn,pn, qnc,fn,fn, pad,pad);
 #endif
 
@@ -209,7 +213,7 @@ int main()
 #ifndef EF_PRT
 			printf("aux:%s, ", auxnb_str);
 #else
-			printf("\t%s",auxnb_str);
+			//printf("%-8s ",auxnb_str);
 #endif
 			//printf("aux:%llu(%s), ", auxnb, auxnb_str);
 
@@ -291,7 +295,10 @@ int main()
 #ifndef EF_PRT
 			printf("cost:%fms, ", elapsed_ms/LOOP);
 #else
-			printf("\t%f\n", elapsed_ms/LOOP);
+			printf("%8.4f  ", elapsed_ms/LOOP);
+			printf("%-8s ",auxnb_str);
+			dc_get_fftconv_kernel_name(Op, kn_fft_data,kn_fft_filter,kn_cgemm,kn_ifft);
+			printf(" %s %s %s %s\n",kn_fft_data,kn_fft_filter,kn_cgemm,kn_ifft);
 #endif
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );

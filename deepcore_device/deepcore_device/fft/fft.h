@@ -447,9 +447,13 @@
 // sync issue walk aound
 #define FFT_WA_SM70_SYNC
 #if CUDA_ARCH>=70
+#define LB_16x16_256 __launch_bounds__(256,8)
+#define LB_16x16_128 __launch_bounds__(128,16)
 #define LB_32x32_512 __launch_bounds__(512,2)
 #define LB_32x32_256 __launch_bounds__(256,4)
 #else
+#define LB_16x16_256 __launch_bounds__(256,2)
+#define LB_16x16_128 __launch_bounds__(128,4)
 #define LB_32x32_512 __launch_bounds__(512,1)
 #define LB_32x32_256 __launch_bounds__(256,2)
 #endif

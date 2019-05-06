@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_r2c_split_perm( 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_split_perm( 
       float2*              d_c, 
 const float * __restrict__ d_r, 
 const float * __restrict__ d_RF, 
@@ -51,7 +51,7 @@ const float * __restrict__ d_RF,
     s_hfft16( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*gdy );
 }
-__global__ void dk_sfft16x16_r2c_split_perm_pad( 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_split_perm_pad( 
       float2*              d_c, 
 const float * __restrict__ d_r, 
 const float * __restrict__ d_RF, 

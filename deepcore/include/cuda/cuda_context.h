@@ -4,6 +4,7 @@
 #include"../idc_status.h"
 #include"../../include/fft/fft_rf.h"
 #include"cuda_kernel.h"
+#include"../idc_string.h"
 
 static const uint16_t g_fftco[]={0,4,12,28,60,124};
 
@@ -37,7 +38,11 @@ INLINE void cuda_context_bind( const cuda_context_t* p ){ hipCtxSetCurrent(p->ct
 INLINE void cuda_context_unbind(){ hipCtxPopCurrent(NULL); }
 INLINE void cuda_context_create_kernel( cuda_kernel_t* p_kernel, hipModule_t module, const char* p_name )
 {
-    hipModuleGetFunction( &p_kernel->id, module, p_name );
+    hipError_t rtn;
+    rtn = hipModuleGetFunction( &p_kernel->id, module, p_name );
+    if(rtn != hipSuccess){
+        printf("fail to get kernel %s, err:%d\n",p_name,(int)rtn);
+    }
     p_kernel->smemnb=0;
     p_kernel->extra[0]=(void*)HIP_LAUNCH_PARAM_BUFFER_POINTER;
     p_kernel->extra[1]=(void*)p_kernel->args;
@@ -50,7 +55,12 @@ INLINE void cuda_context_bind( const cuda_context_t* p ){ cuCtxSetCurrent(p->ctx
 INLINE void cuda_context_unbind(){ cuCtxPopCurrent(NULL); }
 INLINE void cuda_context_create_kernel( cuda_kernel_t* p_kernel, CUmodule module, const char* p_name )
 {
-    cuModuleGetFunction( &p_kernel->id, module, p_name );
+    CUresult rtn;
+    rtn = cuModuleGetFunction( &p_kernel->id, module, p_name );
+    if(rtn != CUDA_SUCCESS){
+        printf("fail to get kernel %s, err:%d\n",p_name,(int)rtn);
+    }
+    idc_strncpy(p_kernel->kernel_name, p_name+3, KER_NAME_LEN);
     p_kernel->smemnb=0;
     p_kernel->extra[0]=(void*)CU_LAUNCH_PARAM_BUFFER_POINTER;
     p_kernel->extra[1]=(void*)p_kernel->args;

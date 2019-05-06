@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_c2r_grad( 
+__global__ void LB_16x16_128 dk_sfft16x16_c2r_grad( 
     float* d_r, 
     const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, 
@@ -29,7 +29,7 @@ __global__ void dk_sfft16x16_c2r_grad(
         }
     }
 }
-__global__ void dk_sfft16x16_c2r_grad_s3( 
+__global__ void LB_16x16_128 dk_sfft16x16_c2r_grad_s3( 
     float* d_r, 
     const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, float scale )
@@ -60,7 +60,7 @@ __global__ void dk_sfft16x16_c2r_grad_s3(
     } __syncthreads();
     if(tid<72){ d_r[0]=scale*smem[tid]; }
 }
-__global__ void dk_sfft16x16_c2r_grad_s5( 
+__global__ void LB_16x16_128 dk_sfft16x16_c2r_grad_s5( 
     float* d_r, 
     const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, float scale )

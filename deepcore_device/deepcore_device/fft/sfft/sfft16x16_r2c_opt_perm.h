@@ -1,4 +1,4 @@
-__global__ void dk_sfft16x16_r2c_perm_s3( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_s3( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {
@@ -33,7 +33,7 @@ __global__ void dk_sfft16x16_r2c_perm_s3( float2* d_c,
     s_hfft16_s3( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm_s5( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_s5( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {
@@ -72,7 +72,7 @@ __global__ void dk_sfft16x16_r2c_perm_s5( float2* d_c,
     s_hfft16_s5( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm_s7( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_s7( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {
@@ -115,7 +115,7 @@ __global__ void dk_sfft16x16_r2c_perm_s7( float2* d_c,
     s_hfft16_s7( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm_flip_s3( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_flip_s3( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {
@@ -150,7 +150,7 @@ __global__ void dk_sfft16x16_r2c_perm_flip_s3( float2* d_c,
     s_hfft16_s3( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm_flip_s5( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_flip_s5( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {
@@ -189,7 +189,7 @@ __global__ void dk_sfft16x16_r2c_perm_flip_s5( float2* d_c,
     s_hfft16_s5( c, &smem[y*144+v*18+u*8], spx, s_RF, brev, x, u );
     s_store9( d_c, &smem[y*145+x], &smem[x*145+y], c, 16*ldc*inc );
 }
-__global__ void dk_sfft16x16_r2c_perm_flip_s7( float2* d_c, 
+__global__ void LB_16x16_256 dk_sfft16x16_r2c_perm_flip_s7( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int ldc, unsigned int ldr )
 {

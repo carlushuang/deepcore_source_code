@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(512,2) 
+__global__ void LB_32x32_512
 dk_sfft32x32_r2c_perm_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF, int ldc, int ldr )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};

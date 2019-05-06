@@ -493,3 +493,20 @@ DEEPCOREAPIENTRY dc_status_t dc_exit()
     }
     return dc_success;
 }
+DEEPCOREAPIENTRY dc_status_t dc_get_fftconv_kernel_name(dc_fftconvOp Op ,char* kn_fft_data,char* kn_fft_filter,char*kn_cgemm,char*kn_ifft)
+{
+    idc_fftconvOp_t *op =  (idc_fftconvOp_t*)Op;
+    if(kn_fft_data){
+        idc_strncpy(kn_fft_data, op->kfft[0].kernel_name, KER_NAME_LEN);
+    }
+    if(kn_fft_filter){
+        idc_strncpy(kn_fft_filter, op->kfft[1].kernel_name, KER_NAME_LEN);
+    }
+    if(kn_cgemm){
+        idc_strncpy(kn_cgemm, op->kcgemm.kernel_name, KER_NAME_LEN);
+    }
+    if(kn_ifft){
+        idc_strncpy(kn_ifft, op->kfft[2].kernel_name, KER_NAME_LEN);
+    }
+    return dc_success;
+}
