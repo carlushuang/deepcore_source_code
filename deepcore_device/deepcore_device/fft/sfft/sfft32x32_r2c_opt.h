@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
@@ -31,7 +31,7 @@ dk_sfft32x32_r2c_s3( float2* d_c, const float* __restrict__ d_r, const float* __
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=c[i]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
@@ -66,7 +66,7 @@ dk_sfft32x32_r2c_s5( float2* d_c, const float* __restrict__ d_r, const float* __
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=c[i]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
@@ -107,7 +107,7 @@ dk_sfft32x32_r2c_s7( float2* d_c, const float* __restrict__ d_r, const float* __
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=c[i]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_flip_s3( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
@@ -139,7 +139,7 @@ dk_sfft32x32_r2c_flip_s3( float2* d_c, const float* __restrict__ d_r, const floa
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=c[i]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_flip_s5( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
@@ -175,7 +175,7 @@ dk_sfft32x32_r2c_flip_s5( float2* d_c, const float* __restrict__ d_r, const floa
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=c[i]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_r2c_flip_s7( float2* d_c, const float* __restrict__ d_r, const float* __restrict__ d_RF )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};

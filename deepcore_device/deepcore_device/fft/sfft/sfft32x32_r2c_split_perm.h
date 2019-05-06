@@ -1,5 +1,5 @@
 /*data:n=bat*grid*grid£¬ grad:n=pnc */
-__global__ void __launch_bounds__(512,1) 
+__global__ void LB_32x32_512 
 dk_sfft32x32_r2c_split_perm( 
       float2*              d_c, 
 const float * __restrict__ d_r, 
@@ -55,7 +55,7 @@ const float * __restrict__ d_RF,
     s_hfft( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*ldc*gdy );
 }
-__global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_split_perm_pad( 
+__global__ void LB_32x32_512 dk_sfft32x32_r2c_split_perm_pad( 
       float2*              d_c, 
 const float * __restrict__ d_r, 
 const float * __restrict__ d_RF, 

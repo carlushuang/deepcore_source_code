@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d( float2* d_c, 
+__global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int dir )
 {
@@ -36,7 +36,7 @@ __global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d( float2* d_c,
     s_hfft( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*ldc*gdy );
 }
-__global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d_ext( float2* d_c, 
+__global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_ext( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int dir )
 {
@@ -75,7 +75,7 @@ __global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d_ext( float2* d_
     s_hfft( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d_pad( float2* d_c, 
+__global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_pad( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int pad_x, int pad_y )
 {
@@ -113,7 +113,7 @@ __global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d_pad( float2* d_
     s_hfft( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*ldc*inc );
 }
-__global__ void __launch_bounds__(512,1) dk_sfft32x32_r2c_perm3d_flip( float2* d_c, 
+__global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_flip( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int dir )
 {

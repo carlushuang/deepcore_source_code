@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_xfft32x32_c2r_grad_perm( 
           __half*              d_r, 
     const float2* __restrict__ d_c, 
@@ -37,7 +37,7 @@ dk_xfft32x32_c2r_grad_perm(
         }
     }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_xfft32x32_c2r_grad_perm_s3( 
           __half*              d_r, 
     const float2* __restrict__ d_c, 
@@ -73,7 +73,7 @@ dk_xfft32x32_c2r_grad_perm_s3(
     } __syncthreads();
     if(tid<72){ d_r[0]=__float2half(scale*smem[tid]); }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_xfft32x32_c2r_grad_perm_s5( 
           __half*              d_r, 
     const float2* __restrict__ d_c, 

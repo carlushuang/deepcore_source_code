@@ -108,6 +108,9 @@ __local_func int cuda_context_create( cuda_context_t* p_ctx, char* p_temp )
     p_ctx->status=0;
     if(p_ctx!= NULL){ p_ctx->status=1; }
     cuDevicePrimaryCtxRetain( &p_ctx->ctx, p_ctx->dev );
+#if CUDA_ARCH >= 70
+    cuCtxSetCacheConfig (CU_FUNC_CACHE_PREFER_SHARED);
+#endif
     cuDevicePrimaryCtxSetFlags( p_ctx->dev, CU_CTX_SCHED_AUTO|CU_CTX_MAP_HOST|CU_CTX_LMEM_RESIZE_TO_MAX );
     cuCtxPushCurrent( p_ctx->ctx );
     switch(p_ctx->arch)

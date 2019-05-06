@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c( __half2* d_c, 
+__global__ void LB_32x32_256 dk_xfft32x32_r2c( __half2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, unsigned int n, unsigned int n_cells )
 {
@@ -29,7 +29,7 @@ __global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c( __half2* d_c,
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=__float22half2_rn(c[i]); }
 }
-__global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c_ext( __half2* d_c, 
+__global__ void LB_32x32_256 dk_xfft32x32_r2c_ext( __half2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, unsigned int n, unsigned int n_cells )
 {
@@ -61,7 +61,7 @@ __global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c_ext( __half2* d_c,
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=__float22half2_rn(c[i]); }
 }
-__global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c_pad( __half2* d_c, 
+__global__ void LB_32x32_256 dk_xfft32x32_r2c_pad( __half2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, unsigned int n, unsigned int n_cells, int pad_x, int pad_y )
 {
@@ -95,7 +95,7 @@ __global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c_pad( __half2* d_c,
 #pragma unroll
     for( int i=0; i<17; ++i ){ d_c[i*32]=__float22half2_rn(c[i]); }
 }
-__global__ void __launch_bounds__(256,2) dk_xfft32x32_r2c_flip( __half2* d_c, 
+__global__ void LB_32x32_256 dk_xfft32x32_r2c_flip( __half2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     unsigned int nx, unsigned int ny, unsigned int ldr, unsigned int n, unsigned int n_cells )
 {

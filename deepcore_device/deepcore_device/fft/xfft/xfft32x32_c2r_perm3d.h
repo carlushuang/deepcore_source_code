@@ -1,5 +1,5 @@
 #define xfft32x32_c2r_perm3d(dir,suffix)\
-__global__ void __launch_bounds__(256,2)\
+__global__ void LB_32x32_256\
 dk_xfft32x32_c2r_perm3d##suffix(        \
           __half*              d_r  ,   \
     const float2* __restrict__ d_c  ,   \

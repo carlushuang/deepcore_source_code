@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(256,2) dk_sfft32x32_c2r_grad_perm( 
+__global__ void LB_32x32_256 dk_sfft32x32_c2r_grad_perm( 
     float* d_r, const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc, 
@@ -32,7 +32,7 @@ __global__ void __launch_bounds__(256,2) dk_sfft32x32_c2r_grad_perm(
         }
     }
 }
-__global__ void __launch_bounds__(256,2) dk_sfft32x32_c2r_grad_perm_s3( 
+__global__ void LB_32x32_256 dk_sfft32x32_c2r_grad_perm_s3( 
     float* d_r, const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc )
@@ -64,7 +64,7 @@ __global__ void __launch_bounds__(256,2) dk_sfft32x32_c2r_grad_perm_s3(
     } __syncthreads();
     if(tid<72){ d_r[0]=scale*smem[tid]; }
 }
-__global__ void __launch_bounds__(256,2) 
+__global__ void LB_32x32_256 
 dk_sfft32x32_c2r_grad_perm_s5( float* d_r, 
     const float2* __restrict__ d_c, const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc )

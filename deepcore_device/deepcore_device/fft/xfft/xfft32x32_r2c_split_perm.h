@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_split_perm( float2* d_c, 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_split_perm( float2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int nx, int ny, int ldc, int ldr, int n, 
     int grid_x, int grid_y, int sx, int sy, int is_grad )
@@ -43,7 +43,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_split_perm( float2* d_
     s_hfft( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*ldc*gdy );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_split_perm_pad( float2* d_c, 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_split_perm_pad( float2* d_c, 
     const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int nx, int ny, int ldc, int ldr, int n, 
     int grid_x, int grid_y, int sx, int sy, int is_grad, int pad_x, int pad_y )

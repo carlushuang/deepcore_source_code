@@ -3,6 +3,7 @@ PWD=`pwd`
 NVCC=/usr/local/cuda/bin/nvcc
 NVCC_FLAGS="--fatbin -gencode arch=compute_70,code=sm_70 --ptxas-options=-v -Xptxas -disable-optimizer-consts "
 # NVCC_FLAGS="$NVCC_FLAGS -G "
+#NVCC_FLAGS="$NVCC_FLAGS --maxrregcount 64 "
 WD=deepcore_device/deepcore_device/
 SRC=deepcore_device.cu
 BUILD_DIR=$PWD/build
@@ -23,13 +24,15 @@ test -f $BUILD_DIR/$TARGET || exit 1
 # 2, let fatbin be c string
 hexdump  -v -e '1/8 "0x%016x," "\n"' $BUILD_DIR/$TARGET  | \
         paste -sd '   \n' -   > deepcore/include/dev/fftconv/kbin_sm70.h
+# exit 0
+
 fi
 
 # 3, build deepcore
 if [ $B1 ] ;then
 WD=deepcore
 CC=gcc
-CFLAGS=" -I/usr/local/cuda/include -std=c99 -Wall -O2 -shared -fPIC "
+CFLAGS=" -DCUDA_ARCH=70 -I/usr/local/cuda/include -std=c99 -Wall -O2 -shared -fPIC "
 #CFLAGS=" $CFLAGS -DDC_VERBOSE"
 LDFLAGS=" -L/usr/local/cuda/lib64 -lcuda -lcudart "
 TARGET=libdeepcore.so

@@ -1,4 +1,4 @@
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s3( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_s3( 
     float2* d_c, const __half* __restrict__ d_r, 
     const float* __restrict__ d_RF, int ldc, int ldr )
 {
@@ -35,7 +35,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s3(
     s_hfft_s3( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s5( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_s5( 
     float2* d_c, const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int ldc, int ldr )
 {
@@ -76,7 +76,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s5(
     s_hfft_s5( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s7( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_s7( 
     float2* d_c, const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int ldc, int ldr )
 {
@@ -121,7 +121,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_s7(
     s_hfft_s7( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_flip_s3( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_flip_s3( 
     float2* d_c, const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int ldc, int ldr )
 {
@@ -158,7 +158,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_flip_s3(
     s_hfft_s3( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_flip_s5( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_flip_s5( 
     float2* d_c, const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int ldc, int ldr )
 {
@@ -199,7 +199,7 @@ __global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_flip_s5(
     s_hfft_s5( c, &smem[y*544+v*34+u*16], spx, s_RF, brev, x, u );
     s_store( d_c, &smem[y*545+x], &smem[p*545+q], c, 32*gdy*ldc );
 }
-__global__ void __launch_bounds__(512,1) dk_xfft32x32_r2c_perm_flip_s7( 
+__global__ void LB_32x32_512 dk_xfft32x32_r2c_perm_flip_s7( 
     float2* d_c, const __half* __restrict__ d_r, const float* __restrict__ d_RF, 
     int ldc, int ldr )
 {

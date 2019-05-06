@@ -60,9 +60,9 @@ int get_next_shape(tensor_shape_t * shape){
 	static int range_k[]={128,256,384};
 #endif
 #if 0
-	static int range_x[]={5};
-	static int range_w[]={64};
-	static int range_c[]={256};
+	static int range_x[]={3};
+	static int range_w[]={27};
+	static int range_c[]={384};
 	static int range_k[]={384};
 #endif
 	static int have_next = 1;
