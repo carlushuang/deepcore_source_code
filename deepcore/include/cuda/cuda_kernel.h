@@ -105,7 +105,7 @@ INLINE void cuda_kernel_launch( cuda_kernel_t* p, hipStream_t s )
 {
     hipError_t rtn = hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
     if(rtn != hipSuccess){
-        printf("fail to get kernel %s, err:%d\n",p_name,(int)rtn);
+        printf("fail to get kernel %s, err:%d\n",p->kernel_name,(int)rtn);
     }
 }
 #else
