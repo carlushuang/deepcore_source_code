@@ -2,58 +2,58 @@
 #include"../../include/cuda/cuda_context.h"
 
 #ifdef __HIPCC__
-static const unsigned int long long kbin_fftconv_gfx906[]=
+static const unsigned int kbin_fftconv_gfx906[]=
 {
 #include"../../include/dev/fftconv/kbin_gfx906.h"
 };
-static const unsigned int long long* p_devbin[][4]=
+static const unsigned int* p_devbin[][4]=
 {
     { kbin_fftconv_gfx906 },
 };
 #else
-static const unsigned int long long kbin_fftconv_sm50[]=
+static const unsigned int kbin_fftconv_sm50[]=
 {
 #include"../../include/dev/fftconv/kbin_sm50.h"
 };
-static const unsigned int long long kbin_fftconv_sm52[]=
+static const unsigned int kbin_fftconv_sm52[]=
 {
 #include"../../include/dev/fftconv/kbin_sm52.h"
 };
-static const unsigned int long long kbin_fftconv_sm60[]=
+static const unsigned int kbin_fftconv_sm60[]=
 {
 #include"../../include/dev/fftconv/kbin_sm60.h"
 };
-static const unsigned int long long kbin_fftconv_sm61[]=
+static const unsigned int kbin_fftconv_sm61[]=
 {
 #include"../../include/dev/fftconv/kbin_sm61.h"
 };
-static const unsigned int long long kbin_fftconv_sm70[]=
+static const unsigned int kbin_fftconv_sm70[]=
 {
 #include"../../include/dev/fftconv/kbin_sm70.h"
 };
 
-static const unsigned int long long kbin_blas_sm50[]=
+static const unsigned int kbin_blas_sm50[]=
 {
 #include"../../include/dev/blas/kbin_sm50.h"
 };
-static const unsigned int long long kbin_blas_sm52[]=
+static const unsigned int kbin_blas_sm52[]=
 {
 #include"../../include/dev/blas/kbin_sm52.h"
 };
-static const unsigned int long long kbin_blas_sm60[]=
+static const unsigned int kbin_blas_sm60[]=
 {
 #include"../../include/dev/blas/kbin_sm60.h"
 };
-static const unsigned int long long kbin_blas_sm61[]=
+static const unsigned int kbin_blas_sm61[]=
 {
 #include"../../include/dev/blas/kbin_sm61.h"
 };
-static const unsigned int long long kbin_blas_sm70[]=
+static const unsigned int kbin_blas_sm70[]=
 {
 #include"../../include/dev/blas/kbin_sm70.h"
 };
 
-static const unsigned int long long* p_devbin[][4]=
+static const unsigned int* p_devbin[][4]=
 {
     { kbin_fftconv_sm50, kbin_blas_sm50 },
     { kbin_fftconv_sm52, kbin_blas_sm52 },

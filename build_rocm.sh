@@ -14,15 +14,15 @@ mkdir -p $BUILD_DIR
 if [ $B0 ] ;then
 # 1, build device code
 rm -rf $BUILD_DIR/$TARGET
-pushd $WD
+cd $WD
 $HIPCC $HIPCC_FLAGS $SRC -o $BUILD_DIR/$TARGET || exit 1
-popd
+cd -
 
 test -f $BUILD_DIR/$TARGET || exit 1
 
 
 # 2, let fatbin be c string
-hexdump  -v -e '1/8 "0x%016x," "\n"' $BUILD_DIR/$TARGET  | \
+hexdump  -v -e '1/4 "0x%08x," "\n"' $BUILD_DIR/$TARGET  | \
         paste -sd '   \n' -   > deepcore/include/dev/fftconv/kbin_gfx906.h
 fi
 
@@ -38,14 +38,14 @@ LDFLAGS=" -L/opt/rocm/hcc/lib -Wl,--rpath=/opt/rocm/hcc/lib -ldl -lm -lpthread -
 
 
 rm -rf $BUILD_DIR/$TARGET
-pushd $WD
+cd $WD
 
 SRC=$(find ./  -type f -name "*.c")
 echo $SRC
 
 $CC $CFLAGS $SRC $LDFLAGS -o  $BUILD_DIR/$TARGET || exit 1
 
-popd
+cd -
 fi
 
 # 4. build example
@@ -57,9 +57,9 @@ LDFLAGS=" -L/opt/rocm/hcc/lib -L/opt/rocm/lib -L/opt/rocm/lib64 -Wl,--rpath=/opt
 LDFLAGS="$LDFLAGS -Wl,-rpath,$BUILD_DIR -lm  -L$BUILD_DIR -ldeepcore "
 SRC=fftconv.cpp
 TARGET=fftconv
-pushd $WD
+cd $WD
 
 $CXX $CXXFLAGS $SRC $LDFLAGS -o $BUILD_DIR/$TARGET
 
-popd
+cd -
 

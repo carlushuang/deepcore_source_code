@@ -8,6 +8,7 @@
 //#pragma comment( lib, "cuda.lib" )
 
 #define EF_PRT
+#define CPU_VALIDATION
 
 #define DC_CALL(call) 							\
 	do{											\
@@ -53,17 +54,19 @@ static int get_max_batch(int w){
     return 512;
 }
 int get_next_shape(tensor_shape_t * shape){
-#if 1
+#if 0
 	static int range_x[]={3,5,7};
 	static int range_w[]={14,27,32,55,64,72,96,128,192};
 	static int range_c[]={64,128,192,256,384};
 	static int range_k[]={128,256,384};
+	static int nn = 0;
 #endif
-#if 0
+#if 1
 	static int range_x[]={3};
-	static int range_w[]={27};
-	static int range_c[]={384};
-	static int range_k[]={384};
+	static int range_w[]={55};
+	static int range_c[]={64};
+	static int range_k[]={128};
+	static int nn = 4;
 #endif
 	static int have_next = 1;
 	static int xi=0;
@@ -89,7 +92,10 @@ LABEL_0:
 		goto LABEL_1;
 	}
 	pad=get_pad(x);
-	b = get_max_batch(w);
+	if(nn)
+		b = nn;
+	else
+		b = get_max_batch(w);
 
 	shape->ds = w;
 	shape->fs = x;
@@ -235,14 +241,14 @@ int main()
 			for( int i=0; i<fn*fn*pnc*qnc; ++i ){
 				b[i]=((float)rand())/RAND_MAX;
 			}
-#if 0
-			printf(AP"  start cpu caculation...");
+#ifdef CPU_VALIDATION
+			//printf(AP"  start cpu caculation...");
 			for( int i=0; i<onc; ++i ){
 				for( int s=0; s<bat; ++s ){
 					conv( &c[(i*bat+s)*on*on], &a[s*in*in], &b[i*(dir==0?(pnc*fn*fn):(fn*fn))], dir, in, in, fn, fn, on, on, inc, bat, pad, pad, dir==0?(fn*fn):(pnc*fn*fn) );
 				}
 			}
-			printf(" finish\n");
+			//printf(" finish\n");
 #endif
 			dc_tensor_store( d_a, ishape, a, bat*in*in*sizeof(float), bat*in*in*sizeof(float), inc, NULL );
 			dc_tensor_store( d_b, kshape, b, pnc*fn*fn*sizeof(float), pnc*fn*fn*sizeof(float), qnc, NULL );
@@ -298,7 +304,7 @@ int main()
 			printf("%8.4f  ", elapsed_ms/LOOP);
 			printf("%-8s ",auxnb_str);
 			dc_get_fftconv_kernel_name(Op, kn_fft_data,kn_fft_filter,kn_cgemm,kn_ifft);
-			printf(" %s %s %s %s\n",kn_fft_data,kn_fft_filter,kn_cgemm,kn_ifft);
+			printf(" %s %s %s %s",kn_fft_data,kn_fft_filter,kn_cgemm,kn_ifft);
 #endif
 
 			dc_tensor_load( d, bat*on*on*sizeof(float), d_c, oshape, bat*on*on*sizeof(float), onc, NULL );
@@ -309,9 +315,11 @@ int main()
 #endif
 
 			is_ok=check( c, d, bat*onc*on*on );
-#ifndef EF_PRT
-			printf("%s\n",is_ok?"ok":"fail");
+#ifdef CPU_VALIDATION
+			printf(" ...%s",is_ok?"ok":"fail");
 #endif
+
+			printf("\n");
 
 		__LAB0:
 #ifdef __HIPCC__

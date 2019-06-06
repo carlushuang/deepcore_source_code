@@ -43,6 +43,7 @@ INLINE void cuda_context_create_kernel( cuda_kernel_t* p_kernel, hipModule_t mod
     if(rtn != hipSuccess){
         printf("fail to get kernel %s, err:%d\n",p_name,(int)rtn);
     }
+    idc_strncpy(p_kernel->kernel_name, p_name+3, KER_NAME_LEN);
     p_kernel->smemnb=0;
     p_kernel->extra[0]=(void*)HIP_LAUNCH_PARAM_BUFFER_POINTER;
     p_kernel->extra[1]=(void*)p_kernel->args;
