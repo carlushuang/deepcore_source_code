@@ -22,7 +22,7 @@ cd -
 test -f $BUILD_DIR/$TARGET || exit 1
 
 # 2, let fatbin be c string
-hexdump  -v -e '1/8 "0x%016x," "\n"' $BUILD_DIR/$TARGET  | \
+hexdump  -v -e '1/4 "0x%08x," "\n"' $BUILD_DIR/$TARGET  | \
         paste -sd '   \n' -   > deepcore/include/dev/fftconv/kbin_sm70.h
 # exit 0
 
