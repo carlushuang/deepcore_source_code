@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft32x32_c2r_perm2d(x) (x)
+#   else
+#define FLIP_X_sfft32x32_c2r_perm2d(x) ((32-x)&31)
+#   endif
+#else
+#define FLIP_X_sfft32x32_c2r_perm2d(x) ((32-x)&31)
+#endif
+
 #define sfft32x32_c2r_perm2d(dir,suffix)        \
 __global__ void dk_sfft32x32_c2r_perm2d##suffix(\
     float       *              d_r  ,   \
@@ -23,7 +33,7 @@ __global__ void dk_sfft32x32_c2r_perm2d##suffix(\
     unsigned int q=tid>>3;        \
     unsigned int icell=(bid<<3)+y;\
     if(y==0){ ((float*)s_RF)[tid]=d_RF[tid]; }\
-    unsigned int flip_x=(32-x)&31;            \
+    unsigned int flip_x=FLIP_X_sfft32x32_c2r_perm2d(x); \
     d_c+=q*ldc+(bid<<3)+p;                    \
     d_r+=icell*ldr+flip_x;                    \
     if(dir==0){ d_x+=icell; } else            \

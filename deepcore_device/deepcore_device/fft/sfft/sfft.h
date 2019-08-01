@@ -702,7 +702,11 @@ __device__ __forceinline__ float2 s_cmul( const float2& a, const float2& b )
 }
 __device__ __forceinline__ float2 s_icmul( const float2& a, const float2& b )
 {
+#ifdef FFTCONV_CONJ
+    return make_float2(a.x*b.x+a.y*b.y,-a.x*b.y+b.x*a.y);
+#else
     return make_float2(a.x*b.x+a.y*b.y,a.x*b.y-b.x*a.y);
+#endif
 }
 __device__ __forceinline__ void s_postproc( float2& a, float2& b, const float2& RF )
 {

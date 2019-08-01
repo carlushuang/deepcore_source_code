@@ -4,6 +4,9 @@
 #include "half/half.h"
 #include "vop.h"
 
+#define FFTCONV_CONJ
+#define FFTCONV_CONJ_OMEGA
+
 extern "C"
 {
 

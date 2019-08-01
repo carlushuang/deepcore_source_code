@@ -30,6 +30,24 @@ __global__ void dk_scgemv( char* d_c,
             if((bidx+3*32)<ny){ b[3]=*((const float2*)&d_b[3*256]); } 
             d_b+=qldb;
             a=smem[s*16+v+i];
+#if defined(FFTCONV_CONJ) && defined(FFTCONV_CONJ_OMEGA)
+            c[i+0].x+= a.x*b[0].x;
+            c[i+0].y+=-a.x*b[0].y;
+            c[i+1].x+= a.x*b[1].x;
+            c[i+1].y+=-a.x*b[1].y;
+            c[i+2].x+= a.x*b[2].x;
+            c[i+2].y+=-a.x*b[2].y;
+            c[i+3].x+= a.x*b[3].x;
+            c[i+3].y+=-a.x*b[3].y;
+            c[i+0].x+= a.y*b[0].y;
+            c[i+0].y+= a.y*b[0].x;
+            c[i+1].x+= a.y*b[1].y;
+            c[i+1].y+= a.y*b[1].x;
+            c[i+2].x+= a.y*b[2].y;
+            c[i+2].y+= a.y*b[2].x;
+            c[i+3].x+= a.y*b[3].y;
+            c[i+3].y+= a.y*b[3].x;
+#else
             c[i+0].x+= a.x*b[0].x;
             c[i+0].y+= a.x*b[0].y;
             c[i+1].x+= a.x*b[1].x;
@@ -46,6 +64,7 @@ __global__ void dk_scgemv( char* d_c,
             c[i+2].y+=-a.y*b[2].x;
             c[i+3].x+= a.y*b[3].y;
             c[i+3].y+=-a.y*b[3].x;
+#endif
         }
         if(((++s)&=7)==0){ __syncthreads(); }
     }
