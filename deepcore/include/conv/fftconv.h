@@ -8,6 +8,7 @@ typedef struct idc_fftconvOp{
     cuda_kernel_t kfft[3];
     cuda_kernel_t kcgemm;
     size_t        divpt[2];
+    size_t        total_size;
     uint32_t      ng;
     uint32_t      ags;
     uint32_t      bgs;

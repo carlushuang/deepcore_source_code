@@ -113,6 +113,7 @@ __local_func size_t idc_fftconv_createOp( idc_fftconvOp_t* Op, const cuda_contex
     n<<=3;
     Op->divpt[0]=(size_t)n*npc*inc;
     Op->divpt[1]=(size_t)n*pnc*qnc;
+    Op->total_size = Op->divpt[0]+Op->divpt[1]+(size_t)n*npc*onc;
     return (Op->divpt[0]+Op->divpt[1]+(size_t)n*npc*onc);
 }
 __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_context_t* p_ctx, int prc, int ng, int pnx, int pny, int pnc, int ldp, int fnx, int fny, int qnx, int qny, int qnc, int ldq, int bat )
@@ -202,16 +203,88 @@ __local_func size_t idc_fftconv_createOp_grad( idc_fftconvOp_t* Op, const cuda_c
     return (Op->divpt[0]+Op->divpt[1]+(size_t)n*pnc*qnc);
 }
 #ifdef __HIPCC__
+void valid_vector(float * lhs, float * rhs, int len){
+    int i;
+    int err_cnt=0;
+    for(i=0;i<len;i++){
+#define ABS(x)      (    (x)>0?(x):-1*(x)   )
+        float delta = lhs[i] - rhs[i];
+        delta = ABS(delta);
+        if(delta > 0.02){
+            err_cnt++;
+            if(err_cnt<100)
+                printf("XX diff at %d, lhs:%f, rhs:%f\n",i,lhs[i],rhs[i]);
+        }
+    }
+}
 __local_func void idc_fftconv( idc_fftconvOp_t* Op, hipDeviceptr_t d_aux, hipDeviceptr_t d_target, hipDeviceptr_t d_source, hipDeviceptr_t d_filter, hipDeviceptr_t d_x, float alpha, hipStream_t s )
 {
     uint32_t g;
+    Op->kfft[0].force_wrap=0;
+    Op->kfft[1].force_wrap=0;
+    Op->kfft[2].force_wrap=0;
+    Op->kcgemm.force_wrap=0;
     for( g=0; g<Op->ng; ++g ){
         hipDeviceptr_t d_a=d_aux;
         hipDeviceptr_t d_b=d_a+Op->divpt[0];
         hipDeviceptr_t d_c=d_b+Op->divpt[1];
+
+        //size_t c_len = Op->total_size-Op->divpt[0]-Op->divpt[1];
+        //hipMemset(d_c, 0, c_len);
+        //printf("dsize:%d, fsize:%d, osize:%d\n", Op->divpt[0], Op->divpt[1], Op->total_size-Op->divpt[0]-Op->divpt[1]);
+
         idc_fft2d_r2c( &Op->kfft[0], d_a, d_source+g*Op->ags, s );
         idc_fft2d_r2c( &Op->kfft[1], d_b, d_filter+g*Op->bgs, s );
         idc_cgemm( &Op->kcgemm, d_c, d_a, d_b, s );
+#if 0
+        hipCtxSynchronize();
+        float * a_host = (float*)malloc(sizeof(float)*Op->divpt[0]);
+        float * b_host = (float*)malloc(sizeof(float)*Op->divpt[1]);
+        float * c_host = (float*)malloc(sizeof(float)*(Op->total_size-Op->divpt[0]-Op->divpt[1]));
+
+        hipMemcpy(a_host, d_a, sizeof(float)*Op->divpt[0], hipMemcpyDeviceToHost);
+        hipMemcpy(b_host, d_b, sizeof(float)*Op->divpt[1], hipMemcpyDeviceToHost);
+        hipMemcpy(c_host, d_c, sizeof(float)*(Op->total_size-Op->divpt[0]-Op->divpt[1]), hipMemcpyDeviceToHost);
+        int i;
+        printf("d_a: ____________________________\n");
+        for(i=0;i<Op->divpt[0];i++) printf("%d:%f, ",i,a_host[i]);
+        printf("d_a_end: ________________________\n");
+
+        printf("d_b: ____________________________\n");
+        for(i=0;i<Op->divpt[1];i++) printf("%d:%f, ",i,b_host[i]);
+        printf("d_b_end: ________________________\n");
+
+        printf("d_c: ____________________________\n");
+        for(i=0;i<(Op->total_size-Op->divpt[0]-Op->divpt[1]);i++) printf("%d:%f, ",i,c_host[i]);
+        printf("d_c_end: ________________________\n");
+
+        free(a_host);
+        free(b_host);
+        free(c_host);
+#endif
+#if 0
+        hipCtxSynchronize();
+        
+
+        hipDeviceptr_t d_c_2;
+        hipMalloc(&d_c_2, c_len);
+        hipMemset(d_c_2, 0, c_len);
+        Op->kcgemm.force_wrap=1;
+        idc_cgemm( &Op->kcgemm, d_c_2, d_a, d_b, s );
+
+        float *dc_host, *dc_host_2;
+        dc_host = (float *)malloc(c_len);
+        dc_host_2 = (float *)malloc(c_len);
+        hipCtxSynchronize();
+        hipMemcpy(dc_host, d_c, c_len, hipMemcpyDeviceToHost);
+        hipMemcpy(dc_host_2, d_c_2, c_len, hipMemcpyDeviceToHost);
+        hipCtxSynchronize();
+        valid_vector(dc_host, dc_host_2, c_len/4);
+
+        free(dc_host);
+        free(dc_host_2);
+        hipFree(d_c_2);
+#endif
         idc_fft2d_c2r( &Op->kfft[2], d_target+g*Op->cgs, d_c, d_x, alpha, s );
     }
 }

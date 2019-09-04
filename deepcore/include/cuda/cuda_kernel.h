@@ -25,9 +25,11 @@
 typedef struct cuda_kernel{
 #ifdef __HIPCC__
     hipFunction_t id;
+    hipFunction_t id_wrap = NULL;
 #else
     CUfunction id;
 #endif
+    int        force_wrap;
     char       kernel_name[KER_NAME_LEN];
     uint32_t   gdx;
     uint32_t   gdy;
@@ -103,7 +105,14 @@ INLINE void cuda_kernel_sep_f32( cuda_kernel_t* p_kernel, int i, float p )
 #ifdef __HIPCC__
 INLINE void cuda_kernel_launch( cuda_kernel_t* p, hipStream_t s )
 {
-    hipError_t rtn = hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    hipError_t rtn;
+    if(p->force_wrap && p->id_wrap){
+        printf("<warping:%s>\n",p->kernel_name);
+        rtn = hipModuleLaunchKernel( p->id_wrap, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+    }
+    else
+        rtn = hipModuleLaunchKernel( p->id, p->gdx, p->gdy, p->gdz, p->block.x, p->block.y, 1, p->smemnb, s, NULL, (void**)p->extra );
+
     if(rtn != hipSuccess){
         printf("fail to get kernel %s, err:%d\n",p->kernel_name,(int)rtn);
     }

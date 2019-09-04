@@ -30,8 +30,8 @@ fi
 if [ $B1 ] ;then
 WD=deepcore
 CC=g++
-CFLAGS=`/opt/rocm/bin/hipconfig --cpp_config`" -Wall -O2 -shared -fPIC -x c++ "
-#CFLAGS=" $CFLAGS -DDC_VERBOSE"
+CFLAGS=`/opt/rocm/bin/hipconfig --cpp_config`" -Wall -O2 -shared -fPIC -std=c++11 -x c++ "
+CFLAGS=" $CFLAGS -DDC_VERBOSE"
 CFLAGS=" $CFLAGS -D__HIPCC__ -D__HIP_PLATFORM_HCC__ "
 TARGET=libdeepcore.so
 LDFLAGS=" -L/opt/rocm/hcc/lib -Wl,--rpath=/opt/rocm/hcc/lib -ldl -lm -lpthread -lhc_am -Wl,--whole-archive -lmcwamp -Wl,--no-whole-archive"
@@ -51,7 +51,7 @@ fi
 # 4. build example
 WD=example
 CXX=g++
-CXXFLAGS=`/opt/rocm/bin/hipconfig --cpp_config`" -I$PWD/deepcore/include/ -Wall -O2 "
+CXXFLAGS=`/opt/rocm/bin/hipconfig --cpp_config`" -I$PWD/deepcore/include/ -std=c++11 -Wall -O2 "
 CXXFLAGS=" $CXXFLAGS -D__HIPCC__ -D__HIP_PLATFORM_HCC__ "
 LDFLAGS=" -L/opt/rocm/hcc/lib -L/opt/rocm/lib -L/opt/rocm/lib64 -Wl,--rpath=/opt/rocm/hcc/lib -ldl -lm -lpthread -lhc_am -Wl,--whole-archive -lmcwamp -lhip_hcc -lhsa-runtime64 -lhsakmt -Wl,--no-whole-archive"
 LDFLAGS="$LDFLAGS -Wl,-rpath,$BUILD_DIR -lm  -L$BUILD_DIR -ldeepcore "

@@ -4,10 +4,13 @@
 #include"common.h"
 #include"deepcore.h"
 #include <unistd.h>
+#ifdef USE_MKLDNN
+#include "mkldnn_conv.h"
+#endif
 //#pragma comment( lib, "../deepcore/deepcore.lib" )
 //#pragma comment( lib, "cuda.lib" )
 
-#define EF_PRT
+//#define EF_PRT
 #define CPU_VALIDATION
 
 #define DC_CALL(call) 							\
@@ -21,13 +24,13 @@
 	}while(0)
 
 #define AP "[fftconv]"
-#define WARMUP 3
-#define LOOP 8
+#define WARMUP 0
+#define LOOP 1
 #define ALEN(arr) (sizeof(arr)/sizeof(arr[0]))
 
 static int need_continue(int w,int c,int k){
-    if(k<c)
-        return 1;
+    //if(k<c)
+    //    return 1;
     return 0;
 }
 static int get_pad(int x){
@@ -44,29 +47,66 @@ static int get_max_batch(int w){
     if (w>=192)
         return 16;
     if (w>=128)
-        return 32;
+        return 24;
     if (w>=96)
-        return 64;
+        return 32;
     if (w>=72)
-        return 128;
+        return 64;
     if (w>=55)
-        return 256;
-    return 512;
+        return 128;
+	if (w>=30)
+    	return 256;
+	return 512;
 }
 int get_next_shape(tensor_shape_t * shape){
 #if 0
-	static int range_x[]={3,5,7};
-	static int range_w[]={14,27,32,55,64,72,96,128,192};
+	static int range_x[]={5};
+	static int range_w[]={14,27,32,55,64,96,128,192,224};
 	static int range_c[]={64,128,192,256,384};
-	static int range_k[]={128,256,384};
-	static int nn = 0;
+	static int range_k[]={80, 128,256,384};
+	static int nn = 16;
 #endif
-#if 1
+#if 0
+	static int range_x[]={5};
+	static int range_w[]={14};
+	static int range_c[]={1};
+	static int range_k[]={1};
+	static int nn = 1;
+#endif
+#if 0
 	static int range_x[]={3};
 	static int range_w[]={55};
 	static int range_c[]={64};
 	static int range_k[]={128};
 	static int nn = 4;
+#endif
+#if 0
+	static int range_x[]={7};
+	static int range_w[]={192};
+	static int range_c[]={768};
+	static int range_k[]={128};
+	static int nn = 16;
+#endif
+#if 1
+	static int range_x[]={5};
+	static int range_w[]={128};
+	static int range_c[]={64};
+	static int range_k[]={64};
+	static int nn = 2;
+#endif
+#if 0
+	static int range_x[]={5};
+	static int range_w[]={192};
+	static int range_c[]={384};
+	static int range_k[]={384};
+	static int nn = 16;
+#endif
+#if 0
+	static int range_x[]={3};
+	static int range_w[]={32};
+	static int range_c[]={64};
+	static int range_k[]={128};
+	static int nn = 16;
 #endif
 	static int have_next = 1;
 	static int xi=0;
@@ -157,7 +197,7 @@ int main()
 		int dir=0;
 		for(  dir=0; dir<1; ++dir )
 		{
-			//printf(AP"start shape %d, dir:%d -----------------------------------\n",e,dir);
+			//printf(AP"start shape, dir:%d -----------------------------------\n",dir);
 #if 0
 			int pn=shapes[e].ds;
 			int fn=shapes[e].fs;
@@ -228,6 +268,7 @@ int main()
 			float* c=new float[bat*onc*on*on];
 			float* d=new float[bat*onc*on*on];
 
+#if 1
 			for( int i=0; i<inc; ++i )
 			{
 				for( int z=0; z<bat; ++z ){
@@ -241,13 +282,26 @@ int main()
 			for( int i=0; i<fn*fn*pnc*qnc; ++i ){
 				b[i]=((float)rand())/RAND_MAX;
 			}
+#endif
+#if 0
+			for( int i=0; i<inc*bat*in*in; ++i ) a[i] = 0.1*(i+1);
+			for( int i=0; i<fn*fn*pnc*qnc; ++i ) b[i] = 0.2*(i+1);
+#endif
+
 #ifdef CPU_VALIDATION
+#ifdef USE_MKLDNN
+			if(dir==0)
+				mkldnn_conv_fwd_cnhw(a, b, c, bat,pnc,pn,pn,qnc,fn,fn,pad,pad,1,1,1,1);
+			else
+				mkldnn_conv_fwd_cnhw(a, b, c, bat,pnc,pn,pn,qnc,fn,fn,pad,pad,1,1,1,1);
+#else
 			//printf(AP"  start cpu caculation...");
 			for( int i=0; i<onc; ++i ){
 				for( int s=0; s<bat; ++s ){
 					conv( &c[(i*bat+s)*on*on], &a[s*in*in], &b[i*(dir==0?(pnc*fn*fn):(fn*fn))], dir, in, in, fn, fn, on, on, inc, bat, pad, pad, dir==0?(fn*fn):(pnc*fn*fn) );
 				}
 			}
+#endif
 			//printf(" finish\n");
 #endif
 			dc_tensor_store( d_a, ishape, a, bat*in*in*sizeof(float), bat*in*in*sizeof(float), inc, NULL );
@@ -315,8 +369,12 @@ int main()
 #endif
 
 			is_ok=check( c, d, bat*onc*on*on );
+			//printf("d_d: ____________________________\n");
+			//for(int i=0;i<bat*onc*on*on;i++) printf("%d:%f, ",i,d[i]);
+			//printf("d_d_end: ________________________\n");
 #ifdef CPU_VALIDATION
 			printf(" ...%s",is_ok?"ok":"fail");
+			assert(is_ok && "compute not valid, need check");
 #endif
 
 			printf("\n");

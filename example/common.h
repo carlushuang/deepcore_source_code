@@ -41,10 +41,16 @@ bool check( const float* __restrict a, const float* __restrict b, int n )
     double s0=0;
     double s1=0;
     double ref=0;
+	int err_cnt=0;
     for( int i=0; i<n; ++i ){
        float  ai=a[i];
        float  bi=b[i];
 	   double d=(double)ai-(double)bi;
+	   if(d>=0.01){
+		   err_cnt++;
+		   if(err_cnt<100)
+		   		printf("diff at %d, a:%f, b:%f\n",i,ai,bi);
+	   }
        double dd=d*d;
        double aa=2.0*ai*ai;
 	   double x=dd/aa;
@@ -52,7 +58,7 @@ bool check( const float* __restrict a, const float* __restrict b, int n )
        s0+=dd;
        s1+=aa;
 	}
-    return (sqrt(s0/s1)<1e-6);
+    return (sqrt(s0/s1)<1e-4);
 }
 
 void inline b2s(size_t bytes, char * str){
