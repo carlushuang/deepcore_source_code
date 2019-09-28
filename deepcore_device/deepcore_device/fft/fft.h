@@ -430,7 +430,7 @@
 
 #ifdef __HIPCC__
 
-#define perm_mask 0x0
+#define perm_mask 0x7
 #define sync
 
 #else

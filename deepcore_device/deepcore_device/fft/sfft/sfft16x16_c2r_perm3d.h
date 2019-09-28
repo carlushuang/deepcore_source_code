@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft16x16_c2r_perm3d(x) (x)
+#   else
+#define FLIP_X_sfft16x16_c2r_perm3d(x) ((16-x)&15)
+#   endif
+#else
+#define FLIP_X_sfft16x16_c2r_perm3d(x) ((16-x)&15)
+#endif
+
 #define sfft16x16_c2r_perm3d(dir,suffix)            \
     __global__ void LB_16x16_256 dk_sfft16x16_c2r_perm3d##suffix(\
           float *              d_r  ,     \
@@ -21,7 +31,7 @@
     unsigned int x=tid&15;                \
     unsigned int y=tid>>4;                \
     unsigned int icell=(bx<<4)+y;         \
-    unsigned int flip_x=(16-x)&15;        \
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r_perm3d(x); \
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }\
     d_c+=(y*onc+by)*ldc+(bx<<4)+x;        \
     d_r+=by*ldr+icell*ny*nx+flip_x;       \

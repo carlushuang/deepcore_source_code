@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft16x16_c2r_splice_perm(x) (x)
+#   else
+#define FLIP_X_sfft16x16_c2r_splice_perm(x) ((16-x)&15)
+#   endif
+#else
+#define FLIP_X_sfft16x16_c2r_splice_perm(x) ((16-x)&15)
+#endif
+
 #define sfft16x16_c2r_splice_perm(dir,suffix)        \
 __global__ void LB_16x16_256 dk_sfft16x16_c2r_splice_perm##suffix(\
           float *              d_r   ,  \
@@ -33,7 +43,7 @@ __global__ void LB_16x16_256 dk_sfft16x16_c2r_splice_perm##suffix(\
     unsigned int cell_y=map_cell_id/grid_x;        \
     unsigned int ox=cell_x*sx;                     \
     unsigned int oy=cell_y*sy;                     \
-    unsigned int flip_x=(16-x)&15;                 \
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r_splice_perm(x); \
     unsigned int vax=(cell_x<grid_x-1)?sx:(nx-ox); \
     unsigned int vay=(cell_y<grid_y-1)?sy:(ny-oy); \
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }         \

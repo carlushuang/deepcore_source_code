@@ -116,12 +116,17 @@ __device__ __forceinline__ void s_hifft16( float2* c, float2* d, float* sptr, co
     float* spx=&sptr[x];
     float* spy=&sptr[v*18+u];
     float* spz=&sptr[v*18+u*8];
+#ifdef FFTCONV_CONJ
+    d[0].x-=d[8].y; 
+    d[0].y+=d[8].x;
+#else
     if(x>0){
         d[0].x-=d[8].y; 
         d[0].y+=d[8].x;
     } else {
         d[0].y=d[8].x;
     }
+#endif
     STORE8(spx,d,18,.x) sync
     LOAD8(c,spy,2,.x)   sync
     STORE8(spx,d,18,.y) sync
@@ -144,9 +149,14 @@ __device__ __forceinline__ void s_hifft16( float2* c, float2* d, float* sptr, co
 __device__ __forceinline__ void s_vifft16( float2* d, float2* c, const float2* s_RF, const int* brev, int x )
 {
     float2 a, b, temp=c[0];
+#ifdef FFTCONV_CONJ
+    c[0].x=temp.x+temp.y;
+    c[0].y=temp.x-temp.y;
+#else
     float sign=((x&7)>0)?1.f:-1.f;
     c[0].x=-sign*temp.y+temp.x;
     c[0].y= sign*temp.y+temp.x;
+#endif
 #pragma unroll
     for( int i=1; i<4; ++i )
     {
@@ -163,16 +173,29 @@ __device__ __forceinline__ void s_vifft16( float2* d, float2* c, const float2* s
     c[4].x*= 2.0f;
     c[4].y*=-2.0f;
     FFT8(c,i)
+
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
 #pragma unroll
     for( int i=0; i<8; ++i ){ d[i]=c[brev[i]]; }
-    if((x&7)==0)
-    {
+#   else
+    #pragma unroll
+    for( int i=0; i<8; ++i ){
+        d[i].x=c[brev[(8-i)%8]].x;
+        d[i].y=c[brev[(7-i)%8]].y;
+    }
+#   endif
+#else
+#pragma unroll
+    for( int i=0; i<8; ++i ){ d[i]=c[brev[i]]; }
+    if((x&7)==0){
     #pragma unroll
         for( int i=0; i<8; ++i ){
             d[i].x=c[brev[(8-i)%8]].x;
             d[i].y=c[brev[(7-i)%8]].y;
         }
     }
+#endif
 }
 __device__ __forceinline__ void s_vfft16_s3( float2* c, float* sst, float* sld, const float2* s_RF, const int* brev )
 {
