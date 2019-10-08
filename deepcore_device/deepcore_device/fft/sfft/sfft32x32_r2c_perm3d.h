@@ -77,7 +77,7 @@ __global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_ext( float2* d_c,
 }
 __global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_pad( float2* d_c, 
     const float* __restrict__ d_r, const float* __restrict__ d_RF, 
-    unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int pad_x, int pad_y )
+    unsigned int nx, unsigned int ny, unsigned int ldc, unsigned int ldr, unsigned int n_cells, int dir, int pad_x, int pad_y )
 {
     const int brev[]={0,8,4,12,2,10,6,14,1,9,5,13,3,11,7,15};
     __shared__ float smem[16*545];
@@ -95,9 +95,12 @@ __global__ void LB_32x32_512 dk_sfft32x32_r2c_perm3d_pad( float2* d_c,
     unsigned int v=x>>1;
     int icell=(bx<<4)+y;
     int ox=(int)x-pad_x;
-    int oy=-pad_y;  
+    int oy=-pad_y;
+    unsigned int nxy=nx*ny;
+    unsigned int ldx=dir==0?nxy:ldr;
+    unsigned int ldy=dir==0?ldr:nxy;
     d_c+=(q*inc+by)*ldc+(bx<<4)+p;
-    d_r+=by*ldr+icell*ny*nx+ox;
+    d_r+=by*ldy+icell*ldx+ox;
     CLEAR16C(c)
     float* spx=&smem[y*544+x];
     float* spy=&smem[y*544+v*34+u];
