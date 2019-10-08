@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft32x32_c2r_grad_perm(x) (x)
+#   else
+#define FLIP_X_sfft32x32_c2r_grad_perm(x) ((32-x)&31)
+#   endif
+#else
+#define FLIP_X_sfft32x32_c2r_grad_perm(x) ((32-x)&31)
+#endif
+
 __global__ void LB_32x32_256 dk_sfft32x32_c2r_grad_perm( 
     float* d_r, const float2* __restrict__ d_c, 
     const float* __restrict__ d_RF, 
@@ -18,7 +28,7 @@ __global__ void LB_32x32_256 dk_sfft32x32_c2r_grad_perm(
     unsigned int q=tid>>3;
     unsigned int icell=(bx<<3)+y;
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }  
-    unsigned int flip_x=(32-x)&31;
+    unsigned int flip_x=FLIP_X_sfft32x32_c2r_grad_perm(x);
     d_r+=by*ldr+icell*ny*nx+flip_x;
     d_c+=(q*qnc+by)*ldc+(bx<<3)+p;
     s_load( d, &smem[p*547+q], &smem[y*547+x], d_c, qnc*ldc*32 );
@@ -55,7 +65,7 @@ __global__ void LB_32x32_256 dk_sfft32x32_c2r_grad_perm_s3(
     s_load( d, &smem[p*547+q], &smem[y*547+x], d_c, qnc*ldc*32 );
     s_hifft( c, d, &smem[y*560], s_RF, brev, x );
     s_vifft( d, c, s_RF, brev, x );
-    unsigned int flip_x=(32-x)&31;
+    unsigned int flip_x=FLIP_X_sfft32x32_c2r_grad_perm(x);
     float* spr=&smem[y*9+flip_x];
     if(flip_x<3){
         spr[0]=d[0].x;
@@ -87,7 +97,7 @@ dk_sfft32x32_c2r_grad_perm_s5( float* d_r,
     s_load( d, &smem[p*547+q], &smem[y*547+x], d_c, qnc*ldc*32 );
     s_hifft( c, d, &smem[y*560], s_RF, brev, x );
     s_vifft( d, c, s_RF, brev, x ); 
-    unsigned int flip_x=(32-x)&31;
+    unsigned int flip_x=FLIP_X_sfft32x32_c2r_grad_perm(x);
     float* spr=&smem[y*25+flip_x];
     if(flip_x<5){
         spr[0*5]=d[0].x;
