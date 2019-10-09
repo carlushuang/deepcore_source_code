@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft8x8_c2r_splice(x) (x)
+#   else
+#define FLIP_X_sfft8x8_c2r_splice(x) ((8-x)&7)
+#   endif
+#else
+#define FLIP_X_sfft8x8_c2r_splice(x) ((8-x)&7)
+#endif
+
 #define sfft8x8_c2r_splice(dir,suffix)        \
 __global__ void dk_sfft8x8_c2r_splice##suffix(\
           float *              d_r,    \
@@ -32,7 +42,7 @@ __global__ void dk_sfft8x8_c2r_splice##suffix(\
     unsigned int cell_y=map_cell_id/grid_x;        \
     unsigned int ox=cell_x*sx;                     \
     unsigned int oy=cell_y*sy;                     \
-    unsigned int flip_x=(8-x)&7;                   \
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_splice(x); \
     unsigned int vax=(cell_x<grid_x-1)?sx:(nx-ox); \
     unsigned int vay=(cell_y<grid_y-1)?sy:(ny-oy); \
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }         \

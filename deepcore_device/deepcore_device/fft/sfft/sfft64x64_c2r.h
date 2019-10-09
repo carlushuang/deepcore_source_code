@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft64x64_c2r(tid) (tid)
+#   else
+#define FLIP_X_sfft64x64_c2r(tid) ((64-tid)&63)
+#   endif
+#else
+#define FLIP_X_sfft64x64_c2r(tid) ((64-tid)&63)
+#endif
+
 #define sfft64x64_c2r(dir,suffix)        \
 __global__ void dk_sfft64x64_c2r##suffix(\
           float *              d_r  ,    \
@@ -17,7 +27,7 @@ __global__ void dk_sfft64x64_c2r##suffix(\
     unsigned int bx=blockIdx.x;               \
     unsigned int by=blockIdx.y;               \
     unsigned int tid=threadIdx.x;             \
-    unsigned int flip_x=tid?(64-tid):tid;     \
+    unsigned int flip_x=FLIP_X_sfft64x64_c2r(tid); \
     d_c+=(by*gridDim.x+bx)*33*64+tid;         \
     d_r+=by*ldr+bx*ny*nx+flip_x;              \
     if(dir==0){ d_x+=by; } else               \

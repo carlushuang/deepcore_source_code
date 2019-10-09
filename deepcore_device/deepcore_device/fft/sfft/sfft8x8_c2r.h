@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft8x8_c2r(x) (x)
+#   else
+#define FLIP_X_sfft8x8_c2r(x) ((8-x)&7)
+#   endif
+#else
+#define FLIP_X_sfft8x8_c2r(x) ((8-x)&7)
+#endif
+
 #define sfft8x8_c2r(dir,suffix)         \
 __global__ void dk_sfft8x8_c2r##suffix( \
           float *              d_r  ,   \
@@ -21,7 +31,7 @@ __global__ void dk_sfft8x8_c2r##suffix( \
     unsigned int x=tid&7;         \
     unsigned int y=tid>>3;        \
     unsigned int icell=(bid<<4)+y;\
-    unsigned int flip_x=(8-x)&7;  \
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r(x); \
     unsigned int channel=icell/n; \
     d_r+=channel*ldr+(icell%n)*ny*nx+flip_x;\
     if(dir==0){ d_x+=channel; } else\

@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft16x16_c2r_grad(x) (x)
+#   else
+#define FLIP_X_sfft16x16_c2r_grad(x) ((16-x)&15)
+#   endif
+#else
+#define FLIP_X_sfft16x16_c2r_grad(x) ((16-x)&15)
+#endif
+
 __global__ void LB_16x16_128 dk_sfft16x16_c2r_grad( 
     float* d_r, 
     const float2* __restrict__ d_c, 
@@ -12,7 +22,7 @@ __global__ void LB_16x16_128 dk_sfft16x16_c2r_grad(
     unsigned int x=tid&15;
     unsigned int y=tid>>4;  
     unsigned int icell=(blockIdx.x<<3)+y;
-    unsigned int flip_x=(16-x)&15;
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r_grad(x);
     d_r+=icell*ny*nx+flip_x;
     d_c+=icell*144+x;
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }
@@ -51,7 +61,7 @@ __global__ void LB_16x16_128 dk_sfft16x16_c2r_grad_s3(
     __syncthreads();
     s_hifft16( c, d, &smem[y*144], s_RF, brev, x );
     s_vifft16( d, c, s_RF, brev, x );
-    unsigned int flip_x=(16-x)&15;
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r_grad(x);
     float* spr=&smem[y*9+flip_x];
     if(flip_x<3){
         spr[0]=d[0].x;
@@ -82,7 +92,7 @@ __global__ void LB_16x16_128 dk_sfft16x16_c2r_grad_s5(
     __syncthreads();
     s_hifft16( c, d, &smem[y*144], s_RF, brev, x );
     s_vifft16( d, c, s_RF, brev, x );
-    unsigned int flip_x=(16-x)&15;
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r_grad(x);
     float* spr=&smem[y*25+flip_x];
     if(flip_x<5){
         spr[0*5]=d[0].x;

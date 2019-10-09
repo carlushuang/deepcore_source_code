@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft16x16_c2r(x) (x)
+#   else
+#define FLIP_X_sfft16x16_c2r(x) ((16-x)&15)
+#   endif
+#else
+#define FLIP_X_sfft16x16_c2r(x) ((16-x)&15)
+#endif
+
 #define sfft16x16_c2r(dir,suffix)        \
 __global__ void LB_16x16_128 dk_sfft16x16_c2r##suffix(\
           float *              d_r  ,    \
@@ -19,7 +29,7 @@ __global__ void LB_16x16_128 dk_sfft16x16_c2r##suffix(\
     unsigned int x=tid&15;               \
     unsigned int y=tid>>4;               \
     unsigned int icell=(blockIdx.x<<3)+y;\
-    unsigned int flip_x=(16-x)&15;       \
+    unsigned int flip_x=FLIP_X_sfft16x16_c2r(x);  \
     unsigned int channel=icell/n;        \
     d_c+=icell*144+x;                    \
     d_r+=channel*ldr+(icell%n)*ny*nx+flip_x;\

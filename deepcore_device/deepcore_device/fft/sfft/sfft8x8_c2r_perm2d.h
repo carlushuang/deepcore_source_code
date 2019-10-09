@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft8x8_c2r_perm2d(x) (x)
+#   else
+#define FLIP_X_sfft8x8_c2r_perm2d(x) ((8-x)&7)
+#   endif
+#else
+#define FLIP_X_sfft8x8_c2r_perm2d(x) ((8-x)&7)
+#endif
+
 #define sfft8x8_c2r_perm2d(dir,suffix)        \
 __global__ void dk_sfft8x8_c2r_perm2d##suffix(\
           float *              d_r  ,     \
@@ -22,7 +32,7 @@ __global__ void dk_sfft8x8_c2r_perm2d##suffix(\
     unsigned int p=tid&15;                \
     unsigned int q=tid>>4;                \
     unsigned int icell=(bid<<4)+y;        \
-    unsigned int flip_x=(8-x)&7;          \
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_perm2d(x); \
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }\
     d_c+=q*ldc+(bid<<4)+p;                \
     d_r+=icell*ldr+flip_x;                \

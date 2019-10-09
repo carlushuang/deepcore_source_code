@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft64x64_c2r_grad(tid) (tid)
+#   else
+#define FLIP_X_sfft64x64_c2r_grad(tid) ((64-tid)&63)
+#   endif
+#else
+#define FLIP_X_sfft64x64_c2r_grad(tid) ((64-tid)&63)
+#endif
+
 __global__ void dk_sfft64x64_c2r_grad( 
     float* d_r, 
     const float2* __restrict__ d_c, 
@@ -10,7 +20,7 @@ __global__ void dk_sfft64x64_c2r_grad(
     float2 c[32], d[33];
     unsigned int bid=blockIdx.x;
     unsigned int tid=threadIdx.x;
-    int flip_x=tid?(64-tid):tid;
+    int flip_x=FLIP_X_sfft64x64_c2r_grad(tid);
     d_c+=bid*33*64+tid;
     d_r+=bid*ny*nx+flip_x;
     ((float*)s_RF)[tid]=d_RF[tid];
@@ -34,7 +44,7 @@ __global__ void dk_sfft64x64_c2r_grad_s3( float* d_r, const float2* __restrict__
     float2 c[32], d[33];
     unsigned int bid=blockIdx.x;
     unsigned int tid=threadIdx.x;
-    int flip_x=tid?(64-tid):tid;
+    int flip_x=FLIP_X_sfft64x64_c2r_grad(tid);
     d_c+=bid*33*64+tid;
     d_r+=bid*9+flip_x;
     ((float*)s_RF)[tid]=d_RF[tid];
@@ -59,7 +69,7 @@ __global__ void dk_sfft64x64_c2r_grad_s5(
     float2 c[32], d[33];
     unsigned int bid=blockIdx.x;
     unsigned int tid=threadIdx.x;
-    int flip_x=tid?(64-tid):tid;
+    int flip_x=FLIP_X_sfft64x64_c2r_grad(tid);
     d_c+=bid*33*64+tid;
     d_r+=bid*25+flip_x;
     ((float*)s_RF)[tid]=d_RF[tid];

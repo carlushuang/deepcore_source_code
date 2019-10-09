@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft8x8_c2r_grad_perm(x) (x)
+#   else
+#define FLIP_X_sfft8x8_c2r_grad_perm(x) ((8-x)&7)
+#   endif
+#else
+#define FLIP_X_sfft8x8_c2r_grad_perm(x) ((8-x)&7)
+#endif
+
 __global__ void dk_sfft8x8_c2r_grad_perm( float* d_r, 
     const float2* __restrict__ d_c, const float* __restrict__ d_RF, 
     float scale, unsigned int ldr, unsigned int ldc, unsigned int nx, unsigned int ny )
@@ -16,7 +26,7 @@ __global__ void dk_sfft8x8_c2r_grad_perm( float* d_r,
     unsigned int q=tid>>4;
     unsigned int icell=(bx<<4)+y;
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }  
-    unsigned int flip_x=(8-x)&7;
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_grad_perm(x);
     d_r+=by*ldr+icell*ny*nx+flip_x;
     d_c+=(q*onc+by)*ldc+(bx<<4)+p;
     s_load5( d, &smem[p*41+q], &smem[y*41+x], d_c, 8*onc*ldc );
@@ -52,7 +62,7 @@ __global__ void dk_sfft8x8_c2r_grad_perm_s3( float* d_r,
     s_load5( d, &smem[p*41+q], &smem[y*41+x], d_c, 8*onc*ldc );
     s_hifft8( c, d, &smem[y*44], s_RF, brev, x );
     s_vifft8( d, c, s_RF, brev, x );
-    unsigned int flip_x=(8-x)&7;
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_grad_perm(x);
     float* spr=&smem[y*9+flip_x];
     if(flip_x<3){
         spr[0]=d[0].x;

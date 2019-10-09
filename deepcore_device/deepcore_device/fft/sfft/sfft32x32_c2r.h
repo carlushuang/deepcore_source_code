@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft32x32_c2r(x) (x)
+#   else
+#define FLIP_X_sfft32x32_c2r(x) ((32-x)&31)
+#   endif
+#else
+#define FLIP_X_sfft32x32_c2r(x) ((32-x)&31)
+#endif
+
 #define sfft32x32_c2r(dir,suffix)        \
 __global__ void dk_sfft32x32_c2r##suffix(\
           float *              d_r  ,    \
@@ -19,7 +29,7 @@ __global__ void dk_sfft32x32_c2r##suffix(\
     unsigned int x=tid&31;                  \
     unsigned int y=tid>>5;                  \
     unsigned int icell=(blockIdx.x<<3)+y;   \
-    unsigned int flip_x=(32-x)&31;          \
+    unsigned int flip_x=FLIP_X_sfft32x32_c2r(x); \
     unsigned int channel=icell/n;           \
     d_c+=icell*544+x;                       \
     d_r+=channel*ldr+(icell%n)*ny*nx+flip_x;\

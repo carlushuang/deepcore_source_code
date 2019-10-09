@@ -1,3 +1,13 @@
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#define FLIP_X_sfft8x8_c2r_grad(x) (x)
+#   else
+#define FLIP_X_sfft8x8_c2r_grad(x) ((8-x)&7)
+#   endif
+#else
+#define FLIP_X_sfft8x8_c2r_grad(x) ((8-x)&7)
+#endif
+
 __global__ void dk_sfft8x8_c2r_grad( 
           float *              d_r, 
     const float2* __restrict__ d_c, 
@@ -13,7 +23,7 @@ __global__ void dk_sfft8x8_c2r_grad(
     unsigned int x=tid&7;
     unsigned int y=tid>>3;
     unsigned int icell=(bid<<4)+y;
-    unsigned int flip_x=(8-x)&7;
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_grad(x);
     d_r+=icell*ny*nx+flip_x;
     d_c+=icell*48+x;
     if(y==0){ ((float*)s_RF)[x]=d_RF[x]; }
@@ -51,7 +61,7 @@ __global__ void dk_sfft8x8_c2r_grad_s3(
     __syncthreads();
     s_hifft8( c, d, &smem[y*44], s_RF, brev, x );
     s_vifft8( d, c, s_RF, brev, x );
-    unsigned int flip_x=(8-x)&7;
+    unsigned int flip_x=FLIP_X_sfft8x8_c2r_grad(x);
     float* spr=&smem[y*9+flip_x];
     if(flip_x<3){
         spr[0]=d[0].x;
