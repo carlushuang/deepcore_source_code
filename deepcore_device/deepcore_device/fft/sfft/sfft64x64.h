@@ -71,12 +71,17 @@ __device__ __forceinline__ void s_hifft64( float2* c, float2* d, float* smem, co
     float* spy=&smem[v*66+u];
     float* spp=&smem[v*66+u*33];
     float* spq=&smem[(tid>>5)*33+(tid&31)];
+#ifdef FFTCONV_CONJ
+    d[0].x-=d[32].y; 
+    d[0].y+=d[32].x;
+#else
     if(tid>0){
         d[0].x-=d[32].y; 
         d[0].y+=d[32].x;
     } else {
         d[0].y=d[32].x;
     }
+#endif
     STORE32(spx,d,66,.x) __syncthreads();
     LOAD32(c,spy,2,.x)   __syncthreads();
     STORE32(spx,d,66,.y) __syncthreads();
@@ -99,9 +104,14 @@ __device__ __forceinline__ void s_hifft64( float2* c, float2* d, float* smem, co
 __device__ __forceinline__ void s_vifft64( float2* d, float2* c, const float2* s_RF, const int* brev, unsigned int tid )
 {
     float2 a, b, temp=c[0];
+#ifdef FFTCONV_CONJ
+    c[0].x=temp.x+temp.y;
+    c[0].y=temp.x-temp.y;
+#else
     float sign=((tid&31)>0)?1.f:-1.f;
     c[0].x=-sign*temp.y+temp.x;
     c[0].y= sign*temp.y+temp.x;
+#endif
 #pragma unroll
     for( int i=1; i<16; ++i ){
         temp=s_RF[i];
@@ -117,6 +127,18 @@ __device__ __forceinline__ void s_vifft64( float2* d, float2* c, const float2* s
     c[16].x*= 2.0f;
     c[16].y*=-2.0f;
     FFT32(c,i)
+#ifdef FFTCONV_CONJ
+#   ifdef FFTCONV_CONJ_OMEGA
+#pragma unroll
+    for( int i=0; i<32; ++i ){ d[i]=c[brev[i]]; }
+#   else
+#pragma unroll
+    for( int i=0; i<32; ++i ){
+        d[i].x=c[brev[(32-i)%32]].x;
+        d[i].y=c[brev[(31-i)%32]].y;
+    }
+#   endif
+#else
 #pragma unroll
     for( int i=0; i<32; ++i ){ d[i]=c[brev[i]]; }
     if((tid&31)==0){
@@ -126,6 +148,7 @@ __device__ __forceinline__ void s_vifft64( float2* d, float2* c, const float2* s
             d[i].y=c[brev[(31-i)%32]].y;
         }
     }
+#endif
 }
 __device__ __forceinline__ void s_vfft64_s3( float2* c, float* sst, float* sld, const float2* s_RF, const int* brev )
 {
