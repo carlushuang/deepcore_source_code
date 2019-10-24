@@ -145,19 +145,21 @@ __global__ void dk_sfft128x128_r2c_pad( float2* d_c, const float* __restrict__ d
     unsigned int y=tid>>6;
     unsigned int u=tid&7;
     unsigned int v=tid>>3;
-    int p=(x<<1)-pad_x;
-    int q=y-pad_y;
+    int p=(int)(x<<1)-pad_x;
+    int q=(int)y-pad_y;
     float* spx=&smem[ 72*y+x];
     float* spy=&smem[576*y+x];
     float* spu=&smem[ 72*v+u];
     float* spv=&smem[576*y+65*u+((v&7)<<3)];    
     d_c+=(by*gridDim.x+bx)*65*128;
-    d_r+=by*ldr+bx*ny*nx+p;
+    d_r+=by*ldr+bx*ny*nx+((p>=0)?p:0); // WA compiler, p sign/unsigned seems not detected will by HIP
+    CLEAR16C(c);
 #pragma unroll
-    for( int k=0; k<16; ++k, q+=8 ){
-        if((q>=0)&(q<ny)){
-            if(((p+0)>=0)&((p+0)<nx)){ c[k].x=d_r[q*nx+0]; }
-            if(((p+1)>=0)&((p+1)<nx)){ c[k].y=d_r[q*nx+1]; }
+    for( int k=0; k<16; ++k, q+=8){
+        const float* __restrict__ d_r_line = d_r+q*nx;
+        if((q>=0)&(q<(int)ny)){
+            if(((p+0)>=0)&((p+0)<(int)nx)){ c[k].x=*d_r_line; d_r_line++; }
+            if(((p+1)>=0)&((p+1)<(int)nx)){ c[k].y=*d_r_line; }
         }
     }   
     RF[0]=d_RF[y];
@@ -257,14 +259,15 @@ dk_sfft128x128_r2c_flip( float2* d_c, const float* __restrict__ d_r,
     d_r+=by*ldr+bx*ny*nx;
     int q=ny-y-1;
 #pragma unroll
-    for( int k=0; k<16; ++k ){ 
-        int p=k*8+y;
-        if(p<ny){
-            if((dx+0)<nx){ c[k].x=d_r[q*nx+dx  ]; }
-            if((dx+1)<nx){ c[k].y=d_r[q*nx+dx-1]; }
-            q=ny-(p+8);
+    for( int k=0; k<16; ++k ){
+        if(q>=0){
+            const float* __restrict__ d_r_line = d_r+q*nx+dx;
+            if((dx+0)>=0) { c[k].x=*d_r_line; d_r_line -=1 ; }
+            if((dx-1)>=0) { c[k].y=*d_r_line; }
+            q-=8;
         }
-    }   
+    }
+
     RF[0]=d_RF[y];
     CALRF16(RF)
     FFT16(c,)

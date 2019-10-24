@@ -51,6 +51,19 @@ __device__ __forceinline__ static void s_preproc_128x128( float2* c, float* smem
 
 __device__ __forceinline__ void sfft128x128_c2r_store( float* dst, const float* null, float2* c, int x, int y, int nx, int ny, float alpha )
 {
+#ifdef FFTCONV_CONJ
+    int dx=x<<1;
+    int x0=dx;
+    int x1=dx+1;
+    int p=y; 
+    for( int k=0; k<16; ++k ){
+        if(p<ny){
+            if(x0<nx){ dst[p*nx+x0]=alpha*c[k].x; }
+            if(x1<nx){ dst[p*nx+x1]=alpha*c[k].y; }
+        }
+        p+=8;
+    }
+#else
     int dx=x<<1;
     int x0=dx?(128-dx):dx;
     int x1=127-dx;
@@ -63,6 +76,7 @@ __device__ __forceinline__ void sfft128x128_c2r_store( float* dst, const float* 
         }
         p=128-(y+=8);
     }
+#endif
 }
 __device__ __forceinline__ void sfft128x128_c2r_store_relu( float* dst, const float* null, const float2* c, int x, int y, int nx, int ny, float alpha )
 {
@@ -234,6 +248,20 @@ __global__ void dk_sfft128x128_c2r_grad( float* d_r, const float2* __restrict__ 
     FFT8(&c[0],i)
     FFT8(&c[8],i)
     PERMUTE_S8x2_L16(spu,spx,c,4608,8,576,0x7)
+#ifdef FFTCONV_CONJ
+    unsigned int dx=x<<1;
+    unsigned int x0=dx;
+    unsigned int x1=dx+1;
+    unsigned int p=y;
+#pragma unroll
+    for( int k=0; k<16; ++k ){
+        if(p<ny){
+            if(x0<nx){ d_r[p*nx+x0]=scale*c[k].x; }
+            if(x1<nx){ d_r[p*nx+x1]=scale*c[k].y; }
+        }
+        p+=8;
+    }
+#else
     unsigned int dx=x<<1;
     unsigned int x0=dx?(128-dx):dx;
     unsigned int x1=127-dx;
@@ -246,4 +274,5 @@ __global__ void dk_sfft128x128_c2r_grad( float* d_r, const float2* __restrict__ 
         }
         p=128-(y+=8);
     }
+#endif
 }
